@@ -6,6 +6,7 @@ export type IClient = {
     device: IClientDevice;
     haptics: IClientHaptics;
     network: IClientNetwork;
+    preferences: IClientPreferences;
 };
 
 export type IClientPlatform = `androiď` | `ios` | `web`;
@@ -44,4 +45,9 @@ export type IClientNetworkConnection = {
 export type IClientNetwork = {
     status(): Promise<IClientNetworkConnection | undefined>;
     close(): Promise<boolean>;
+};
+
+export type IClientPreferences = {
+    set(key: string, value: string): Promise<boolean>;
+    get(key: string): Promise<string | undefined>;
 };
