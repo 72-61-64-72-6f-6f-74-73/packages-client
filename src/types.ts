@@ -7,6 +7,7 @@ export type IClient = {
     haptics: IClientHaptics;
     network: IClientNetwork;
     preferences: IClientPreferences;
+    share: IClientShare;
 };
 
 export type IClientPlatform = `androiď` | `ios` | `web`;
@@ -50,4 +51,17 @@ export type IClientNetwork = {
 export type IClientPreferences = {
     set(key: string, value: string): Promise<boolean>;
     get(key: string): Promise<string | undefined>;
+};
+
+export type ICapacitorShareOpts = {
+    title?: string;
+    text?: string;
+    url?: string;
+    files?: string[];
+    dialog_title?: string;
+};
+
+export type IClientShare = {
+    status(): Promise<boolean>;
+    share(opts: ICapacitorShareOpts): Promise<void>;
 };
