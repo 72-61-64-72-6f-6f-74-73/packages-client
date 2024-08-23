@@ -1,7 +1,8 @@
 
 import { Capacitor } from "@capacitor/core";
-import type { IClient, IClientBrowser, IClientDatePicker, IClientDevice, IClientDialog, IClientGeolocation, IClientHaptics, IClientHttp, IClientKeystore, IClientNetwork, IClientPlatform, IClientPreferences, IClientShare, IClientWifi, IClientWindow } from "../types";
+import type { IClient, IClientBluetoothLe, IClientBrowser, IClientDatePicker, IClientDevice, IClientDialog, IClientGeolocation, IClientHaptics, IClientHttp, IClientKeystore, IClientNetwork, IClientPlatform, IClientPreferences, IClientShare, IClientWifi, IClientWindow } from "../types";
 import { parse_platform } from "../utils";
+import { CapacitorClientBluetoothLe } from "./bluetooth-le";
 import { CapacitorClientBrowser } from "./browser";
 import { CapacitorClientDatePicker } from "./date-picker";
 import { CapacitorClientDevice } from "./device";
@@ -17,6 +18,7 @@ import { CapacitorClientWifi } from "./wifi";
 import { CapacitorClientWindow } from "./window";
 
 export class ClientCapacitor implements IClient {
+    ble: IClientBluetoothLe;
     private _platform: IClientPlatform = parse_platform(Capacitor.getPlatform());
     private _keystore: IClientKeystore = new CapacitorClientKeystore();
     private _device: IClientDevice = new CapacitorClientDevice();
@@ -31,6 +33,7 @@ export class ClientCapacitor implements IClient {
     private _geo: IClientGeolocation = new CapacitorClientGeolocation();
     private _http: IClientHttp = new CapacitorClientHttp();
     private _window: IClientWindow = new CapacitorClientWindow();
+    private _ble: IClientBluetoothLe = new CapacitorClientBluetoothLe();
 
     public get platform() {
         return this._platform;
@@ -86,5 +89,9 @@ export class ClientCapacitor implements IClient {
 
     public get window() {
         return this._window;
+    }
+
+    public get blue() {
+        return this._ble;
     }
 };

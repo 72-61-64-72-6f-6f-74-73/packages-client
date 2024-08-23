@@ -1,4 +1,5 @@
 import { type BatteryInfo, type DeviceInfo } from '@capacitor/device';
+import { type ScanResult } from '@radroots/capacitor-bluetooth-le';
 import { ConnectToWifiResult, type GetCurrentWifiResult, type ScanWifiResult } from '@radroots/capacitor-wifi';
 
 export type IClient = {
@@ -16,6 +17,7 @@ export type IClient = {
     geo: IClientGeolocation;
     http: IClientHttp;
     window: IClientWindow;
+    ble: IClientBluetoothLe;
 };
 
 export type IClientPlatform = `androiď` | `ios` | `web`;
@@ -161,4 +163,14 @@ export type IClientWindow = {
     status_hide(): Promise<void>;
     status_show(): Promise<void>;
     status_style(style: "light" | "dark"): Promise<void>;
+};
+
+export type IClientBluetoothLeScanResult = ScanResult;
+
+export type IClientBluetoothLe = {
+    enabled(): Promise<boolean>;
+    initialize(): Promise<boolean>;
+    scan(): Promise<boolean>;
+    select_device(device_id: string): Promise<IClientBluetoothLeScanResult | undefined>;
+    select_devices(): Promise<IClientBluetoothLeScanResult[] | undefined>;
 };
