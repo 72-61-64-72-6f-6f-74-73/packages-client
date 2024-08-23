@@ -1,6 +1,6 @@
 
 import { Capacitor } from "@capacitor/core";
-import type { IClient, IClientBrowser, IClientDatePicker, IClientDevice, IClientDialog, IClientGeolocation, IClientHaptics, IClientKeystore, IClientNetwork, IClientPlatform, IClientPreferences, IClientShare, IClientWifi } from "../types";
+import type { IClient, IClientBrowser, IClientDatePicker, IClientDevice, IClientDialog, IClientGeolocation, IClientHaptics, IClientHttp, IClientKeystore, IClientNetwork, IClientPlatform, IClientPreferences, IClientShare, IClientWifi } from "../types";
 import { parse_platform } from "../utils";
 import { CapacitorClientBrowser } from "./browser";
 import { CapacitorClientDatePicker } from "./date-picker";
@@ -8,6 +8,7 @@ import { CapacitorClientDevice } from "./device";
 import { CapacitorClientDialog } from "./dialog";
 import { CapacitorClientGeolocation } from "./geolocation";
 import { CapacitorClientHaptics } from "./haptics";
+import { CapacitorClientHttp } from "./http";
 import { CapacitorClientKeystore } from "./keystore";
 import { CapacitorClientNetwork } from "./network";
 import { CapacitorClientPreferences } from "./preferences";
@@ -27,6 +28,7 @@ export class ClientCapacitor implements IClient {
     private _browser: IClientBrowser = new CapacitorClientBrowser();
     private _dates: IClientDatePicker = new CapacitorClientDatePicker();
     private _geo: IClientGeolocation = new CapacitorClientGeolocation();
+    private _http: IClientHttp = new CapacitorClientHttp();
 
     public get platform() {
         return this._platform;
@@ -74,5 +76,9 @@ export class ClientCapacitor implements IClient {
 
     public get geo() {
         return this._geo;
+    }
+
+    public get http() {
+        return this._http;
     }
 };

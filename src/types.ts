@@ -14,6 +14,7 @@ export type IClient = {
     browser: IClientBrowser;
     dates: IClientDatePicker;
     geo: IClientGeolocation;
+    http: IClientHttp;
 };
 
 export type IClientPlatform = `androiď` | `ios` | `web`;
@@ -123,4 +124,32 @@ export type IClientGeolocationPosition = {
 
 export type IClientGeolocation = {
     current(): Promise<IClientGeolocationPosition | undefined>;
+};
+
+export type IClientHttpOpts = {
+    url: string;
+    method?: string;
+    params?: {
+        [key: string]: string | string[];
+    };
+    data?: any;
+    headers?: {
+        [key: string]: string;
+    };
+    read_timeout?: number;
+    connect_timeout?: number;
+};
+
+export type IClientHttpResponse = {
+    data: any;
+    status: number;
+    headers: {
+        [key: string]: string;
+    };
+    url: string;
+};
+
+export type IClientHttp = {
+    get(opts: IClientHttpOpts): Promise<IClientHttpResponse | undefined>;
+    post(opts: IClientHttpOpts): Promise<IClientHttpResponse | undefined>;
 };
