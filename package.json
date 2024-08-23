@@ -8,6 +8,7 @@
         "dev": "tsc -w"
     },
     "dependencies": {
+        "@capacitor/browser": "^6.0.0",
         "@capacitor/core": "^6.1.2",
         "@capacitor/device": "^6.0.0",
         "@capacitor/dialog": "^6.0.0",

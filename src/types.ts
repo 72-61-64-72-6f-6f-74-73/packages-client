@@ -11,6 +11,7 @@ export type IClient = {
     share: IClientShare;
     wifi: IClientWifi;
     dialog: IClientDialog;
+    browser: IClientBrowser;
 };
 
 export type IClientPlatform = `androiď` | `ios` | `web`;
@@ -90,9 +91,13 @@ export type IClientDialogPrompt = {
     input_text?: string;
 };
 
-
 export type IClientDialog = {
     alert(message: string): Promise<boolean>;
     confirm(message: string): Promise<boolean>;
     prompt(opts: IClientDialogPrompt): Promise<string | false>;
 };
+
+export type IClientBrowser = {
+    open(url: string): Promise<void>;
+};
+
