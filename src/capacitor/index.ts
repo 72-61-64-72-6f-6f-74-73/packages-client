@@ -1,6 +1,6 @@
 
 import { Capacitor } from "@capacitor/core";
-import type { IClient, IClientDevice, IClientHaptics, IClientKeystore, IClientNetwork, IClientPlatform, IClientPreferences, IClientShare } from "../types";
+import type { IClient, IClientDevice, IClientHaptics, IClientKeystore, IClientNetwork, IClientPlatform, IClientPreferences, IClientShare, IClientWifi } from "../types";
 import { parse_platform } from "../utils";
 import { CapacitorClientDevice } from "./device";
 import { CapacitorClientHaptics } from "./haptics";
@@ -8,6 +8,7 @@ import { CapacitorClientKeystore } from "./keystore";
 import { CapacitorClientNetwork } from "./network";
 import { CapacitorClientPreferences } from "./preferences";
 import { CapacitorClientShare } from "./share";
+import { CapacitorClientWifi } from "./wifi";
 
 export class ClientCapacitor implements IClient {
     private _platform: IClientPlatform = parse_platform(Capacitor.getPlatform());
@@ -17,6 +18,7 @@ export class ClientCapacitor implements IClient {
     private _network: IClientNetwork = new CapacitorClientNetwork();
     private _preferences: IClientPreferences = new CapacitorClientPreferences();
     private _share: IClientShare = new CapacitorClientShare();
+    private _wifi: IClientWifi = new CapacitorClientWifi();
 
     public get platform() {
         return this._platform;
@@ -44,5 +46,9 @@ export class ClientCapacitor implements IClient {
 
     public get share() {
         return this._share;
+    }
+
+    public get wifi() {
+        return this._wifi;
     }
 };

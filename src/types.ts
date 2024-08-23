@@ -1,4 +1,5 @@
 import { type BatteryInfo, type DeviceInfo } from '@capacitor/device';
+import { ConnectToWifiResult, type GetCurrentWifiResult, type ScanWifiResult } from '@radroots/capacitor-wifi';
 
 export type IClient = {
     platform: IClientPlatform;
@@ -8,6 +9,7 @@ export type IClient = {
     network: IClientNetwork;
     preferences: IClientPreferences;
     share: IClientShare;
+    wifi: IClientWifi;
 };
 
 export type IClientPlatform = `androiď` | `ios` | `web`;
@@ -64,4 +66,16 @@ export type ICapacitorShareOpts = {
 export type IClientShare = {
     status(): Promise<boolean>;
     share(opts: ICapacitorShareOpts): Promise<void>;
+};
+
+export type IClientWifiScanResult = ScanWifiResult;
+export type IClientWifiCurrentResult = GetCurrentWifiResult;
+export type IClientWifiConnectResult = ConnectToWifiResult;
+
+export type IClientWifi = {
+    scan: () => Promise<IClientWifiScanResult | undefined>;
+    current: () => Promise<IClientWifiCurrentResult | undefined>;
+    connect: (ssid: string, password: string) => Promise<IClientWifiConnectResult | undefined>;
+    connect_prefix: (ssidPrefix: string, password: string) => Promise<IClientWifiConnectResult | undefined>;
+    disconnect: () => Promise<void>
 };
