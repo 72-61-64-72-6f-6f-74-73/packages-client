@@ -15,6 +15,7 @@ export type IClient = {
     dates: IClientDatePicker;
     geo: IClientGeolocation;
     http: IClientHttp;
+    window: IClientWindow;
 };
 
 export type IClientPlatform = `androiď` | `ios` | `web`;
@@ -152,4 +153,12 @@ export type IClientHttpResponse = {
 export type IClientHttp = {
     get(opts: IClientHttpOpts): Promise<IClientHttpResponse | undefined>;
     post(opts: IClientHttpOpts): Promise<IClientHttpResponse | undefined>;
+};
+
+export type IClientWindow = {
+    splash_hide(): Promise<void>;
+    splash_show(showDuration?: number): Promise<void>;
+    status_hide(): Promise<void>;
+    status_show(): Promise<void>;
+    status_style(style: "light" | "dark"): Promise<void>;
 };

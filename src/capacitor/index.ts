@@ -1,6 +1,6 @@
 
 import { Capacitor } from "@capacitor/core";
-import type { IClient, IClientBrowser, IClientDatePicker, IClientDevice, IClientDialog, IClientGeolocation, IClientHaptics, IClientHttp, IClientKeystore, IClientNetwork, IClientPlatform, IClientPreferences, IClientShare, IClientWifi } from "../types";
+import type { IClient, IClientBrowser, IClientDatePicker, IClientDevice, IClientDialog, IClientGeolocation, IClientHaptics, IClientHttp, IClientKeystore, IClientNetwork, IClientPlatform, IClientPreferences, IClientShare, IClientWifi, IClientWindow } from "../types";
 import { parse_platform } from "../utils";
 import { CapacitorClientBrowser } from "./browser";
 import { CapacitorClientDatePicker } from "./date-picker";
@@ -14,6 +14,7 @@ import { CapacitorClientNetwork } from "./network";
 import { CapacitorClientPreferences } from "./preferences";
 import { CapacitorClientShare } from "./share";
 import { CapacitorClientWifi } from "./wifi";
+import { CapacitorClientWindow } from "./window";
 
 export class ClientCapacitor implements IClient {
     private _platform: IClientPlatform = parse_platform(Capacitor.getPlatform());
@@ -29,6 +30,7 @@ export class ClientCapacitor implements IClient {
     private _dates: IClientDatePicker = new CapacitorClientDatePicker();
     private _geo: IClientGeolocation = new CapacitorClientGeolocation();
     private _http: IClientHttp = new CapacitorClientHttp();
+    private _window: IClientWindow = new CapacitorClientWindow();
 
     public get platform() {
         return this._platform;
@@ -80,5 +82,9 @@ export class ClientCapacitor implements IClient {
 
     public get http() {
         return this._http;
+    }
+
+    public get window() {
+        return this._window;
     }
 };
