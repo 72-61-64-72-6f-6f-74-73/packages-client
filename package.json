@@ -9,6 +9,7 @@
     },
     "dependencies": {
         "@capacitor/core": "^6.1.2",
+        "@capacitor/device": "^6.0.0",
         "@radroots/capacitor-secure-storage": "workspace:*"
     },
     "devDependencies": {
