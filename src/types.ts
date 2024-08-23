@@ -7,6 +7,7 @@ export type IClient = {
     platform: IClientPlatform;
     keystore: IClientKeystore;
     device: IClientDevice;
+    haptics: IClientHaptics;
 };
 
 export type IClientPlatform = `androiď` | `ios` | `web`;
@@ -22,4 +23,12 @@ export type IClientKeystore = {
 export type IClientDevice = {
     info(): Promise<CapacitorDeviceInfo | undefined>;
     battery(): Promise<CapacitorDeviceBatteryInfo | undefined>;
+};
+
+export type IClientHaptics = {
+    impact: (mod?: "less" | "more") => Promise<void>;
+    vibrate: (duration?: number) => Promise<void>;
+    selection_start: () => Promise<void>;
+    selection_changed: () => Promise<void>;
+    selection_end: () => Promise<void>;
 };
