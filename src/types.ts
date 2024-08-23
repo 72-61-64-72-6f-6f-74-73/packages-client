@@ -13,6 +13,7 @@ export type IClient = {
     dialog: IClientDialog;
     browser: IClientBrowser;
     dates: IClientDatePicker;
+    geo: IClientGeolocation;
 };
 
 export type IClientPlatform = `androiď` | `ios` | `web`;
@@ -110,4 +111,16 @@ export type IClientDatePickerPresent = {
 
 export type IClientDatePicker = {
     present(opts: IClientDatePickerPresent): Promise<string | undefined>;
+};
+
+export type IClientGeolocationPosition = {
+    lat: number;
+    lng: number;
+    accuracy: number | undefined;
+    altitude: number | undefined;
+    altitude_accuracy: number | undefined;
+};
+
+export type IClientGeolocation = {
+    current(): Promise<IClientGeolocationPosition | undefined>;
 };

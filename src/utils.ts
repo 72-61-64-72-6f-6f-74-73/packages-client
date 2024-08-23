@@ -8,5 +8,9 @@ export function parse_platform(str: string): IClientPlatform {
             return str;
         default:
             return `web`;
-    }
-}
+    };
+};
+
+export function fmt_location_coords(number: number): number {
+    return Math.round(number * 1e7) / 1e7;
+};
