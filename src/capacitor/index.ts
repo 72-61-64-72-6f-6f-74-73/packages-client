@@ -1,8 +1,9 @@
 
 import { Capacitor } from "@capacitor/core";
-import type { IClient, IClientDevice, IClientHaptics, IClientKeystore, IClientNetwork, IClientPlatform, IClientPreferences, IClientShare, IClientWifi } from "../types";
+import type { IClient, IClientDevice, IClientDialog, IClientHaptics, IClientKeystore, IClientNetwork, IClientPlatform, IClientPreferences, IClientShare, IClientWifi } from "../types";
 import { parse_platform } from "../utils";
 import { CapacitorClientDevice } from "./device";
+import { CapacitorClientDialog } from "./dialog";
 import { CapacitorClientHaptics } from "./haptics";
 import { CapacitorClientKeystore } from "./keystore";
 import { CapacitorClientNetwork } from "./network";
@@ -19,6 +20,7 @@ export class ClientCapacitor implements IClient {
     private _preferences: IClientPreferences = new CapacitorClientPreferences();
     private _share: IClientShare = new CapacitorClientShare();
     private _wifi: IClientWifi = new CapacitorClientWifi();
+    private _dialog: IClientDialog = new CapacitorClientDialog();
 
     public get platform() {
         return this._platform;
@@ -50,5 +52,9 @@ export class ClientCapacitor implements IClient {
 
     public get wifi() {
         return this._wifi;
+    }
+
+    public get dialog() {
+        return this._dialog;
     }
 };

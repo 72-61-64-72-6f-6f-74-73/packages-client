@@ -10,6 +10,7 @@ export type IClient = {
     preferences: IClientPreferences;
     share: IClientShare;
     wifi: IClientWifi;
+    dialog: IClientDialog;
 };
 
 export type IClientPlatform = `androiď` | `ios` | `web`;
@@ -77,5 +78,21 @@ export type IClientWifi = {
     current: () => Promise<IClientWifiCurrentResult | undefined>;
     connect: (ssid: string, password: string) => Promise<IClientWifiConnectResult | undefined>;
     connect_prefix: (ssidPrefix: string, password: string) => Promise<IClientWifiConnectResult | undefined>;
-    disconnect: () => Promise<void>
+    disconnect: () => Promise<void>;
+};
+
+export type IClientDialogPrompt = {
+    title?: string;
+    message: string;
+    ok_button_title?: string;
+    cancel_button_title?: string;
+    input_placeholder?: string;
+    input_text?: string;
+};
+
+
+export type IClientDialog = {
+    alert(message: string): Promise<boolean>;
+    confirm(message: string): Promise<boolean>;
+    prompt(opts: IClientDialogPrompt): Promise<string | false>;
 };
