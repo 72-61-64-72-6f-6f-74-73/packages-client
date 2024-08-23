@@ -1,8 +1,9 @@
 
 import { Capacitor } from "@capacitor/core";
-import type { IClient, IClientBrowser, IClientDevice, IClientDialog, IClientHaptics, IClientKeystore, IClientNetwork, IClientPlatform, IClientPreferences, IClientShare, IClientWifi } from "../types";
+import type { IClient, IClientBrowser, IClientDatePicker, IClientDevice, IClientDialog, IClientHaptics, IClientKeystore, IClientNetwork, IClientPlatform, IClientPreferences, IClientShare, IClientWifi } from "../types";
 import { parse_platform } from "../utils";
 import { CapacitorClientBrowser } from "./browser";
+import { CapacitorClientDatePicker } from "./date-picker";
 import { CapacitorClientDevice } from "./device";
 import { CapacitorClientDialog } from "./dialog";
 import { CapacitorClientHaptics } from "./haptics";
@@ -23,6 +24,7 @@ export class ClientCapacitor implements IClient {
     private _wifi: IClientWifi = new CapacitorClientWifi();
     private _dialog: IClientDialog = new CapacitorClientDialog();
     private _browser: IClientBrowser = new CapacitorClientBrowser();
+    private _dates: IClientDatePicker = new CapacitorClientDatePicker();
 
     public get platform() {
         return this._platform;
@@ -62,5 +64,9 @@ export class ClientCapacitor implements IClient {
 
     public get browser() {
         return this._browser;
+    }
+
+    public get dates() {
+        return this._dates;
     }
 };

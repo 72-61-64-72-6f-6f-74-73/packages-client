@@ -16,6 +16,7 @@
         "@capacitor/network": "^6.0.0",
         "@capacitor/preferences": "^6.0.0",
         "@capacitor/share": "^6.0.0",
+        "@radroots/capacitor-date-picker": "workspace:*",
         "@radroots/capacitor-secure-storage": "workspace:*",
         "@radroots/capacitor-wifi": "workspace:*"
     },

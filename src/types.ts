@@ -12,6 +12,7 @@ export type IClient = {
     wifi: IClientWifi;
     dialog: IClientDialog;
     browser: IClientBrowser;
+    dates: IClientDatePicker;
 };
 
 export type IClientPlatform = `androiď` | `ios` | `web`;
@@ -101,3 +102,12 @@ export type IClientBrowser = {
     open(url: string): Promise<void>;
 };
 
+export type IClientDatePickerPresentDatesMode = `date` | `time` | `dateAndTime`;
+
+export type IClientDatePickerPresent = {
+    mode: IClientDatePickerPresentDatesMode;
+};
+
+export type IClientDatePicker = {
+    present(opts: IClientDatePickerPresent): Promise<string | undefined>;
+};
