@@ -1,9 +1,10 @@
 
 import { Capacitor } from "@capacitor/core";
-import type { IClient, IClientBluetoothLe, IClientBrowser, IClientDatePicker, IClientDevice, IClientDialog, IClientGeolocation, IClientHaptics, IClientHttp, IClientKeystore, IClientNetwork, IClientPlatform, IClientPreferences, IClientShare, IClientWifi, IClientWindow } from "../types";
+import type { IClient, IClientBluetoothLe, IClientBrowser, IClientCamera, IClientDatePicker, IClientDevice, IClientDialog, IClientGeolocation, IClientHaptics, IClientHttp, IClientKeystore, IClientNetwork, IClientPlatform, IClientPreferences, IClientShare, IClientWifi, IClientWindow } from "../types";
 import { parse_platform } from "../utils";
 import { CapacitorClientBluetoothLe } from "./bluetooth-le";
 import { CapacitorClientBrowser } from "./browser";
+import { CapacitorClientCamera } from "./camera";
 import { CapacitorClientDatePicker } from "./date-picker";
 import { CapacitorClientDevice } from "./device";
 import { CapacitorClientDialog } from "./dialog";
@@ -34,6 +35,7 @@ export class ClientCapacitor implements IClient {
     private _http: IClientHttp = new CapacitorClientHttp();
     private _window: IClientWindow = new CapacitorClientWindow();
     private _ble: IClientBluetoothLe = new CapacitorClientBluetoothLe();
+    private _camera: IClientCamera = new CapacitorClientCamera();
 
     public get platform() {
         return this._platform;
@@ -93,5 +95,9 @@ export class ClientCapacitor implements IClient {
 
     public get blue() {
         return this._ble;
+    }
+
+    public get camera() {
+        return this._camera;
     }
 };

@@ -2,6 +2,10 @@ import { type BatteryInfo, type DeviceInfo } from '@capacitor/device';
 import { type ScanResult } from '@radroots/capacitor-bluetooth-le';
 import { ConnectToWifiResult, type GetCurrentWifiResult, type ScanWifiResult } from '@radroots/capacitor-wifi';
 
+export type ErrorResponse = {
+    error: string;
+};
+
 export type IClient = {
     platform: IClientPlatform;
     keystore: IClientKeystore;
@@ -18,6 +22,7 @@ export type IClient = {
     http: IClientHttp;
     window: IClientWindow;
     ble: IClientBluetoothLe;
+    camera: IClientCamera;
 };
 
 export type IClientPlatform = `androiď` | `ios` | `web`;
@@ -173,4 +178,54 @@ export type IClientBluetoothLe = {
     scan(): Promise<boolean>;
     select_device(device_id: string): Promise<IClientBluetoothLeScanResult | undefined>;
     select_devices(): Promise<IClientBluetoothLeScanResult[] | undefined>;
+};
+
+export type OsPhotoSelectOptionsBase = {
+    quality?: number;
+    width?: number;
+    height?: number;
+    correct_orientation?: boolean;
+};
+
+export type OsPhotoSelectOptions = OsPhotoSelectOptionsBase & {
+    allow_editing?: boolean;
+    result_type: 'uri' | 'base64' | 'dataUrl';
+    save_to_gallery?: boolean;
+    prompt_label_header?: string;
+    prompt_label_cancel?: string;
+    prompt_label_photo?: string;
+    prompt_label_picture?: string;
+};
+
+export type OsPhotoGallerySelectOptions = OsPhotoSelectOptionsBase & {
+    limit?: number;
+};
+
+export type OsPhoto = {
+    base64_string?: string;
+    data_url?: string;
+    path?: string;
+    web_path?: string;
+    exif?: any;
+    format: string;
+    saved: boolean;
+};
+
+export type OsPhotoGallery = {
+    path?: string;
+    web_path: string;
+    exif?: any;
+    format: string;
+};
+
+export type OsPhotosPermissions = {
+    camera: string;
+    photos: string;
+};
+
+export type IClientCamera = {
+    enabled(): Promise<OsPhotosPermissions | ErrorResponse>;
+    request_enabled(): Promise<OsPhotosPermissions | ErrorResponse>;
+    get_photo(opts: OsPhotoSelectOptions): Promise<OsPhoto | ErrorResponse>;
+    get_photos(opts: OsPhotoGallerySelectOptions): Promise<OsPhotoGallery[] | ErrorResponse>;
 };
