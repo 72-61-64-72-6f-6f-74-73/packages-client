@@ -60,7 +60,7 @@ export type IClientPreferences = {
     get(key: string): Promise<string | undefined>;
 };
 
-export type ICapacitorShareOpts = {
+export type IClientShareOpts = {
     title?: string;
     text?: string;
     url?: string;
@@ -70,7 +70,7 @@ export type ICapacitorShareOpts = {
 
 export type IClientShare = {
     status(): Promise<boolean>;
-    share(opts: ICapacitorShareOpts): Promise<void>;
+    share(opts: IClientShareOpts): Promise<void>;
 };
 
 export type IClientWifiScanResult = ScanWifiResult;
