@@ -24,7 +24,10 @@
         "@radroots/capacitor-bluetooth-le": "workspace:*",
         "@radroots/capacitor-date-picker": "workspace:*",
         "@radroots/capacitor-secure-storage": "workspace:*",
-        "@radroots/capacitor-wifi": "workspace:*"
+        "@radroots/capacitor-sqlite": "workspace:*",
+        "@radroots/capacitor-wifi": "workspace:*",
+        "@radroots/models": "workspace:*",
+        "@radroots/utils": "workspace:*"
     },
     "devDependencies": {
         "typescript": "^5.3.3"

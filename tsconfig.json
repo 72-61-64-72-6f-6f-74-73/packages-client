@@ -1,5 +1,6 @@
 {
     "compilerOptions": {
+        "target": "es2021",
         "lib": [
             "es2021",
             "DOM"
@@ -10,7 +11,7 @@
         "noEmit": true
     },
     "include": [
-        "src",
+        "src", "src/capacitor/camera.ts",
     ],
     "exclude": [
         "node_modules"

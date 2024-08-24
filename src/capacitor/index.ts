@@ -15,11 +15,11 @@ import { CapacitorClientKeystore } from "./keystore";
 import { CapacitorClientNetwork } from "./network";
 import { CapacitorClientPreferences } from "./preferences";
 import { CapacitorClientShare } from "./share";
+import { CapacitorClientSQLite } from "./sql";
 import { CapacitorClientWifi } from "./wifi";
 import { CapacitorClientWindow } from "./window";
 
 export class ClientCapacitor implements IClient {
-    ble: IClientBluetoothLe;
     private _platform: IClientPlatform = parse_platform(Capacitor.getPlatform());
     private _keystore: IClientKeystore = new CapacitorClientKeystore();
     private _device: IClientDevice = new CapacitorClientDevice();
@@ -36,6 +36,7 @@ export class ClientCapacitor implements IClient {
     private _window: IClientWindow = new CapacitorClientWindow();
     private _ble: IClientBluetoothLe = new CapacitorClientBluetoothLe();
     private _camera: IClientCamera = new CapacitorClientCamera();
+    private _db: CapacitorClientSQLite = new CapacitorClientSQLite();
 
     public get platform() {
         return this._platform;
@@ -93,11 +94,15 @@ export class ClientCapacitor implements IClient {
         return this._window;
     }
 
-    public get blue() {
+    public get ble() {
         return this._ble;
     }
 
     public get camera() {
         return this._camera;
+    }
+
+    public get db() {
+        return this._db;
     }
 };

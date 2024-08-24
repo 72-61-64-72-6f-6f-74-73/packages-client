@@ -1,10 +1,7 @@
 import { type BatteryInfo, type DeviceInfo } from '@capacitor/device';
 import { type ScanResult } from '@radroots/capacitor-bluetooth-le';
 import { ConnectToWifiResult, type GetCurrentWifiResult, type ScanWifiResult } from '@radroots/capacitor-wifi';
-
-export type ErrorResponse = {
-    error: string;
-};
+import { type ErrorResponse } from '@radroots/utils';
 
 export type IClient = {
     platform: IClientPlatform;
@@ -22,7 +19,6 @@ export type IClient = {
     http: IClientHttp;
     window: IClientWindow;
     ble: IClientBluetoothLe;
-    camera: IClientCamera;
 };
 
 export type IClientPlatform = `androiď` | `ios` | `web`;
@@ -180,6 +176,13 @@ export type IClientBluetoothLe = {
     select_devices(): Promise<IClientBluetoothLeScanResult[] | undefined>;
 };
 
+export type IClientCamera = {
+    enabled(): Promise<OsPhotosPermissions | ErrorResponse>;
+    request_enabled(): Promise<OsPhotosPermissions | ErrorResponse>;
+    get_photo(opts: OsPhotoSelectOptions): Promise<OsPhoto | ErrorResponse>;
+    get_photos(opts: OsPhotoGallerySelectOptions): Promise<OsPhotoGallery[] | ErrorResponse>;
+};
+
 export type OsPhotoSelectOptionsBase = {
     quality?: number;
     width?: number;
@@ -221,11 +224,4 @@ export type OsPhotoGallery = {
 export type OsPhotosPermissions = {
     camera: string;
     photos: string;
-};
-
-export type IClientCamera = {
-    enabled(): Promise<OsPhotosPermissions | ErrorResponse>;
-    request_enabled(): Promise<OsPhotosPermissions | ErrorResponse>;
-    get_photo(opts: OsPhotoSelectOptions): Promise<OsPhoto | ErrorResponse>;
-    get_photos(opts: OsPhotoGallerySelectOptions): Promise<OsPhotoGallery[] | ErrorResponse>;
 };

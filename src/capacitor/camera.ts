@@ -1,8 +1,7 @@
 
 import { Camera, CameraResultType } from '@capacitor/camera';
-import { ErrorResponse, IClientCamera, OsPhoto, OsPhotoGallery, OsPhotoGallerySelectOptions, OsPhotoSelectOptions, OsPhotosPermissions } from '../types';
-import { err_msg } from '../utils';
-
+import { err_msg, type ErrorResponse } from '@radroots/utils';
+import { IClientCamera, OsPhoto, OsPhotoGallery, OsPhotoGallerySelectOptions, OsPhotoSelectOptions, OsPhotosPermissions } from '../types';
 
 export class CapacitorClientCamera implements IClientCamera {
     private parse_camera_result_type(value: string): CameraResultType {
