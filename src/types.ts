@@ -1,6 +1,6 @@
 import { type BatteryInfo, type DeviceInfo } from '@capacitor/device';
 import { type ScanResult } from '@radroots/capacitor-bluetooth-le';
-import { ConnectToWifiResult, type GetCurrentWifiResult, type ScanWifiResult } from '@radroots/capacitor-wifi';
+import { type ConnectToWifiResult, type GetCurrentWifiResult, type ScanWifiResult } from '@radroots/capacitor-wifi';
 import { type ErrorResponse } from '@radroots/utils';
 
 export type IClient = {

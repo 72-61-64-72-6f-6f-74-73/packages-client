@@ -1,5 +1,5 @@
 import { SecureStorage } from "@radroots/capacitor-secure-storage";
-import { IClientKeystore } from "../types";
+import type { IClientKeystore } from "../types";
 
 export class CapacitorClientKeystore implements IClientKeystore {
     public async init() {
