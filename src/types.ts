@@ -62,6 +62,7 @@ export type IClientNetwork = {
 export type IClientPreferences = {
     set(key: string, value: string): Promise<boolean>;
     get(key: string): Promise<string | undefined>;
+    remove(key: string): Promise<boolean>;
 };
 
 export type IClientShareOpts = {
