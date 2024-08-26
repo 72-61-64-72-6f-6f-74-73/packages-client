@@ -17,4 +17,13 @@ export class CapacitorClientPreferences implements IClientPreferences {
             if (typeof res.value === 'string') return res.value;
         } catch (e) { };
     }
+
+    public async remove(key: string): Promise<boolean> {
+        try {
+            await Preferences.remove({ key });
+            return true;
+        } catch (e) {
+            return false;
+        };
+    }
 }
