@@ -12,7 +12,7 @@ export class CapacitorClientShare implements IClientShare {
         };
     }
 
-    public async share(opts: IClientShareOpts): Promise<void> {
+    public async open(opts: IClientShareOpts): Promise<void> {
         try {
             const { title, text, url, files, dialog_title: dialogTitle } = opts;
             await Share.share({

@@ -65,7 +65,7 @@ export type IClientPreferences = {
     remove(key: string): Promise<boolean>;
 };
 
-export type IClientShareOpts = {
+export type IClientShareOpenOpts = {
     title?: string;
     text?: string;
     url?: string;
@@ -75,7 +75,7 @@ export type IClientShareOpts = {
 
 export type IClientShare = {
     status(): Promise<boolean>;
-    share(opts: IClientShareOpts): Promise<void>;
+    open(opts: IClientShareOpenOpts): Promise<void>;
 };
 
 export type IClientWifiScanResult = ScanWifiResult;
