@@ -1,6 +1,6 @@
 import { type BatteryInfo, type DeviceInfo } from '@capacitor/device';
 import { type ScanResult } from '@radroots/capacitor-bluetooth-le';
-import { type ConnectToWifiResult, type GetCurrentWifiResult, type ScanWifiResult } from '@radroots/capacitor-wifi';
+import { type ConnectToWifiResult, type GetCurrentWifiResult, type PermissionStatus, type ScanWifiResult } from '@radroots/capacitor-wifi';
 import { type ErrorResponse } from '@radroots/utils';
 
 export type IClient = {
@@ -78,6 +78,7 @@ export type IClientShare = {
     open(opts: IClientShareOpenOpts): Promise<void>;
 };
 
+export type IClientWifiPermissionsStatus = PermissionStatus;
 export type IClientWifiScanResult = ScanWifiResult;
 export type IClientWifiCurrentResult = GetCurrentWifiResult;
 export type IClientWifiConnectResult = ConnectToWifiResult;
@@ -88,6 +89,8 @@ export type IClientWifi = {
     connect: (ssid: string, password: string) => Promise<IClientWifiConnectResult | undefined>;
     connect_prefix: (ssidPrefix: string, password: string) => Promise<IClientWifiConnectResult | undefined>;
     disconnect: () => Promise<void>;
+    check_permissions: () => Promise<IClientWifiPermissionsStatus | undefined>;
+    request_permissions: () => Promise<IClientWifiPermissionsStatus | undefined>;
 };
 
 export type IClientDialogPrompt = {

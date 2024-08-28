@@ -1,5 +1,5 @@
 import { Wifi } from '@radroots/capacitor-wifi';
-import type { IClientWifi, IClientWifiConnectResult, IClientWifiCurrentResult, IClientWifiScanResult } from '../types';
+import type { IClientWifi, IClientWifiConnectResult, IClientWifiCurrentResult, IClientWifiPermissionsStatus, IClientWifiScanResult } from '../types';
 
 export class CapacitorClientWifi implements IClientWifi {
     public scan = async (): Promise<IClientWifiScanResult | undefined> => {
@@ -36,4 +36,17 @@ export class CapacitorClientWifi implements IClientWifi {
         } catch (e) { };
     };
 
+    public check_permissions = async (): Promise<IClientWifiPermissionsStatus | undefined> => {
+        try {
+            const res = await Wifi.checkPermissions();
+            return res;
+        } catch (e) { };
+    };
+
+    public request_permissions = async (): Promise<IClientWifiPermissionsStatus | undefined> => {
+        try {
+            const res = await Wifi.requestPermissions();
+            return res;
+        } catch (e) { };
+    };
 }
