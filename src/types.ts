@@ -1,5 +1,6 @@
 import { type BatteryInfo, type DeviceInfo } from '@capacitor/device';
 import { type ScanResult } from '@radroots/capacitor-bluetooth-le';
+import { IOSSettings, type AndroidSettings } from '@radroots/capacitor-native-settings';
 import { type ConnectToWifiResult, type GetCurrentWifiResult, type PermissionStatus, type ScanWifiResult } from '@radroots/capacitor-wifi';
 import { type ErrorResponse } from '@radroots/utils';
 
@@ -131,12 +132,10 @@ export type IClientGeolocationPosition = {
     altitude_accuracy: number | undefined;
 };
 
-export type IGeolocationErrorMessage = `permissions-required` | `permissions-request-failed`;
+export type IGeolocationErrorMessage = `permissions-required`;
 
 export type IClientGeolocation = {
-    current(opts?: {
-        request_permissions?: boolean;
-    }): Promise<IClientGeolocationPosition | undefined | IGeolocationErrorMessage>
+    current(): Promise<IClientGeolocationPosition | undefined | IGeolocationErrorMessage>
 };
 
 export type IClientHttpOpts = {
@@ -235,6 +234,20 @@ export type OsPhotosPermissions = {
     photos: string;
 };
 
+export type IClientSettingsOpenAndroid = {
+    android: {
+        setting: keyof typeof AndroidSettings;
+    }
+};
+
+export type IClientSettingsOpenIos = {
+    ios: {
+        setting: keyof typeof IOSSettings;
+    }
+};
+
+export type IClientSettingsOpen = IClientSettingsOpenAndroid | IClientSettingsOpenIos;
+
 export type IClientSettings = {
-    open(): Promise<boolean>;
+    open(opts: IClientSettingsOpen): Promise<boolean>;
 };

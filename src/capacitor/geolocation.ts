@@ -23,22 +23,11 @@ export class CapacitorClientGeolocation implements IClientGeolocation {
         };
     }
 
-    public async current(opts?: {
-        request_permissions?: boolean;
-    }): Promise<IClientGeolocationPosition | undefined | IGeolocationErrorMessage> {
+    public async current(): Promise<IClientGeolocationPosition | undefined | IGeolocationErrorMessage> {
         try {
-            const has_permissions = await Geolocation.checkPermissions();
-            console.log(JSON.stringify(has_permissions, null, 4), `has_permissions`)
-            if (opts?.request_permissions && has_permissions.location !== `granted`) {
-                const request_permissions = await Geolocation.requestPermissions({ permissions: [`location`] });
-                console.log(JSON.stringify(request_permissions, null, 4), `request_permissions`)
-                if (request_permissions.location !== `granted`) return `permissions-request-failed`;
-            }
             const position = await this.get_current_position();
             return position;
-        } catch (e) {
-            console.log(`e `, e)
-        };
+        } catch (e) { };
     }
 }
 
