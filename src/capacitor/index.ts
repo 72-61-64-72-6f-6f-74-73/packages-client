@@ -14,6 +14,7 @@ import { CapacitorClientHttp } from "./http";
 import { CapacitorClientKeystore } from "./keystore";
 import { CapacitorClientNetwork } from "./network";
 import { CapacitorClientPreferences } from "./preferences";
+import { CapacitorClientSettings } from "./settings";
 import { CapacitorClientShare } from "./share";
 import { CapacitorClientSQLite } from "./sql";
 import { CapacitorClientWifi } from "./wifi";
@@ -37,6 +38,7 @@ export class ClientCapacitor implements IClient {
     private _ble: IClientBluetoothLe = new CapacitorClientBluetoothLe();
     private _camera: IClientCamera = new CapacitorClientCamera();
     private _db: CapacitorClientSQLite = new CapacitorClientSQLite();
+    private _settings: CapacitorClientSettings = new CapacitorClientSettings();
 
     public get platform() {
         return this._platform;
@@ -104,5 +106,9 @@ export class ClientCapacitor implements IClient {
 
     public get db() {
         return this._db;
+    }
+
+    public get settings() {
+        return this._settings;
     }
 };

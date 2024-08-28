@@ -23,6 +23,7 @@
         "@capacitor/status-bar": "^6.0.0",
         "@radroots/capacitor-bluetooth-le": "workspace:*",
         "@radroots/capacitor-date-picker": "workspace:*",
+        "@radroots/capacitor-native-settings": "workspace:*",
         "@radroots/capacitor-secure-storage": "workspace:*",
         "@radroots/capacitor-sqlite": "workspace:*",
         "@radroots/capacitor-wifi": "workspace:*",

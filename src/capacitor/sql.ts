@@ -2,7 +2,6 @@ import { Capacitor } from '@capacitor/core';
 import { CapacitorSQLite, SQLiteConnection, SQLiteDBConnection, type DBSQLiteValues, type capSQLiteChanges, type capSQLiteUpgradeOptions, type capSQLiteVersionUpgrade } from '@radroots/capacitor-sqlite';
 import { LocationGcsSchema, location_gcs_sort, models_initial_upgrade, parse_location_gcs_form_field_types, parse_location_gcss, type ILocationGcsGet, type ILocationGcsGetList, type ILocationGcsQueryBindValues, type ILocationGcsQueryBindValuesTuple, type ILocationGcsUpdate, type IModelsQueryBindValueOpt, type IModelsQueryBindValueTuple, type IModelsQueryParam, type LocationGcs, type LocationGcsFields, type LocationGcsFormFields } from "@radroots/models";
 import { err_msg, time_created_on, uuidv4 } from '@radroots/utils';
-//import { IClientSQLite } from '../types';
 
 const models_upgrades = [
     {
@@ -270,6 +269,7 @@ export class CapacitorClientSQLite {
         ];
         for (const field of this.filter_bind_value_fields(fields)) bind_values_tup.push(field);
         const bind_values = bind_values_tup.map(([_, v]) => v);
+        console.log(JSON.stringify(bind_values, null, 4), `bind_values`)
         const query = `INSERT INTO location_gcs (${bind_values_tup.map(([k]) => k).join(", ")}) VALUES (${bind_values_tup.map((_, num) => `$${1 + num}`).join(", ")});`;
         try {
             const result = await this.execute(query, bind_values);

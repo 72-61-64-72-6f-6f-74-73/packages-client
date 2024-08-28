@@ -19,6 +19,7 @@ export type IClient = {
     http: IClientHttp;
     window: IClientWindow;
     ble: IClientBluetoothLe;
+    settings: IClientSettings;
 };
 
 export type IClientPlatform = `androiď` | `ios` | `web`;
@@ -130,8 +131,12 @@ export type IClientGeolocationPosition = {
     altitude_accuracy: number | undefined;
 };
 
+export type IGeolocationErrorMessage = `permissions-required` | `permissions-request-failed`;
+
 export type IClientGeolocation = {
-    current(): Promise<IClientGeolocationPosition | undefined>;
+    current(opts?: {
+        request_permissions?: boolean;
+    }): Promise<IClientGeolocationPosition | undefined | IGeolocationErrorMessage>
 };
 
 export type IClientHttpOpts = {
@@ -228,4 +233,8 @@ export type OsPhotoGallery = {
 export type OsPhotosPermissions = {
     camera: string;
     photos: string;
+};
+
+export type IClientSettings = {
+    open(): Promise<boolean>;
 };
