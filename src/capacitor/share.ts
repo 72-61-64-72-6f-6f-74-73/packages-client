@@ -1,5 +1,5 @@
 import { Share } from '@capacitor/share';
-import type { IClientShare, IClientShareOpts } from '../types';
+import type { IClientShare, IClientShareOpenOpts } from '../types';
 
 export class CapacitorClientShare implements IClientShare {
     public async status(): Promise<boolean> {
@@ -12,7 +12,7 @@ export class CapacitorClientShare implements IClientShare {
         };
     }
 
-    public async open(opts: IClientShareOpts): Promise<void> {
+    public async open(opts: IClientShareOpenOpts): Promise<void> {
         try {
             const { title, text, url, files, dialog_title: dialogTitle } = opts;
             await Share.share({
