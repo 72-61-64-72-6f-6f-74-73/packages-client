@@ -1,7 +1,7 @@
-import { CapacitorSQLite, SQLiteConnection, SQLiteDBConnection, type DBSQLiteValues, type capSQLiteChanges, type capSQLiteUpgradeOptions, type capSQLiteVersionUpgrade } from '@radroots/capacitor-sqlite';
 import { Capacitor } from '@capacitor/core';
-import { time_created_on, uuidv4, err_msg } from '@radroots/utils';
-import { type IModelsQueryParam, type IModelsQueryBindValue, type IModelsQueryBindValueTuple, type IModelsQueryBindValueOpt, models_initial_upgrade, parse_location_gcs_form_field_types, location_gcs_sort, type ILocationGcsGetList, type ILocationGcsGet, type ILocationGcsUpdate, type ILocationGcsQueryBindValues, type ILocationGcsQueryBindValuesKey, type ILocationGcsQueryBindValuesTuple, parse_location_gcs, parse_location_gcss, type LocationGcs, type LocationGcsFields, type LocationGcsFormFields, LocationGcsSchema} from "@radroots/models";
+import { CapacitorSQLite, SQLiteConnection, SQLiteDBConnection, type DBSQLiteValues, type capSQLiteChanges, type capSQLiteUpgradeOptions, type capSQLiteVersionUpgrade } from '@radroots/capacitor-sqlite';
+import { LocationGcsSchema, location_gcs_sort, models_initial_upgrade, parse_location_gcs_form_field_types, parse_location_gcss, type ILocationGcsGet, type ILocationGcsGetList, type ILocationGcsQueryBindValues, type ILocationGcsQueryBindValuesTuple, type ILocationGcsUpdate, type IModelsQueryBindValueOpt, type IModelsQueryBindValueTuple, type IModelsQueryParam, type LocationGcs, type LocationGcsFields, type LocationGcsFormFields } from "@radroots/models";
+import { err_msg, time_created_on, uuidv4 } from '@radroots/utils';
 
 const models_upgrades = [
     {
@@ -20,8 +20,9 @@ export type IISQLiteServiceOpenDatabase = {
     version: number;
 };
 
-export type IISQLiteServiceMessage = 
-    | "*-validate"
+export type IISQLiteServiceMessage =
+
+    | "*-location-gcs-geohash-unique" | "*-validate"
     | "*-result"
     | "*-fields"
     | "*-open"
@@ -181,7 +182,7 @@ export class CapacitorClientSQLite {
             return this.append_logs("*-exe-result", bv_o, query, result);
         } catch (e) {
             const { error } = err_msg(e, "execute");
-            
+            if (String(e).includes("UNIQUE constraint failed: location_gcs.geohash")) return "*-location-gcs-geohash-unique";
             return this.append_logs("*-exe", bv_o, query, error);
         };
     };
@@ -236,7 +237,7 @@ export class CapacitorClientSQLite {
         };
     }
 
-	private location_gcs_add_validate(opts: LocationGcsFormFields): LocationGcsFields | string[] {
+    private location_gcs_add_validate(opts: LocationGcsFormFields): LocationGcsFields | string[] {
         const opts_filtered = Object.entries(opts).reduce((acc: Record<string, (string | number)>, [key, value]) => {
             if (!!value) {
                 switch (parse_location_gcs_form_field_types(key)) {
@@ -253,7 +254,7 @@ export class CapacitorClientSQLite {
         const location_gcs_v = LocationGcsSchema.safeParse(opts_filtered);
         if (!location_gcs_v.success) return location_gcs_v.error.issues.map(i => i.message);
         else return {
-            ...location_gcs_v.data, 
+            ...location_gcs_v.data,
         };
     };
 
@@ -262,9 +263,9 @@ export class CapacitorClientSQLite {
         if (Array.isArray(optsv)) return optsv;
         const fields = Object.entries(optsv);
         if (!fields.length) return "*-fields";
-		const id = uuidv4();
+        const id = uuidv4();
         const bind_values_tup: IModelsQueryBindValueTuple[] = [
-			["id", id], 
+            ["id", id],
             ["created_at", time_created_on()]
         ];
         for (const field of this.filter_bind_value_fields(fields)) bind_values_tup.push(field);
@@ -272,7 +273,7 @@ export class CapacitorClientSQLite {
         const query = `INSERT INTO location_gcs (${bind_values_tup.map(([k]) => k).join(", ")}) VALUES (${bind_values_tup.map((_, num) => `$${1 + num}`).join(", ")});`;
         try {
             const result = await this.execute(query, bind_values);
-            if (typeof result !== "string" && typeof result.changes?.changes === "number" && result.changes.changes > 0) return { id };      
+            if (typeof result !== "string" && typeof result.changes?.changes === "number" && result.changes.changes > 0) return { id };
             else if (typeof result === "string") return result;
             return "*-result";
         } catch (e) {
@@ -280,12 +281,12 @@ export class CapacitorClientSQLite {
         };
     };
 
-	private location_gcs_query_bind_values = (opts: ILocationGcsQueryBindValues): ILocationGcsQueryBindValuesTuple => {
+    private location_gcs_query_bind_values = (opts: ILocationGcsQueryBindValues): ILocationGcsQueryBindValuesTuple => {
         if ("id" in opts) return ["id", opts.id];
-		else return ["geohash", opts.geohash];
+        else return ["geohash", opts.geohash];
     };
 
-	private location_gcs_get_query_list = (opts: ILocationGcsGetList): IModelsQueryParam => {
+    private location_gcs_get_query_list = (opts: ILocationGcsGetList): IModelsQueryParam => {
         const sort = location_gcs_sort[opts.sort || "newest"];
         let query = "";
         let bind_values = null;
@@ -299,7 +300,7 @@ export class CapacitorClientSQLite {
         };
     };
 
-	private location_gcs_get_parse_opts = (opts: ILocationGcsGet): IModelsQueryParam => {
+    private location_gcs_get_parse_opts = (opts: ILocationGcsGet): IModelsQueryParam => {
         if ("list" in opts) return this.location_gcs_get_query_list(opts);
         else {
             const bv_tup = this.location_gcs_query_bind_values(opts);
@@ -310,7 +311,7 @@ export class CapacitorClientSQLite {
         };
     };
 
-	public async location_gcs_get(opts: ILocationGcsGet): Promise<LocationGcs[] | IISQLiteServiceMessage> {
+    public async location_gcs_get(opts: ILocationGcsGet): Promise<LocationGcs[] | IISQLiteServiceMessage> {
         const { query, bind_values } = this.location_gcs_get_parse_opts(opts);
         try {
             const response = await this.select(query, bind_values);
@@ -325,7 +326,7 @@ export class CapacitorClientSQLite {
         };
     };
 
-	public async location_gcs_delete(opts: ILocationGcsQueryBindValues): Promise<true | IISQLiteServiceMessage> {
+    public async location_gcs_delete(opts: ILocationGcsQueryBindValues): Promise<true | IISQLiteServiceMessage> {
         const bv_tup = this.location_gcs_query_bind_values(opts);
         const bind_values = [bv_tup[1]];
         const query = `DELETE FROM location_gcs WHERE ${bv_tup[0]} = $1;`;
@@ -339,7 +340,7 @@ export class CapacitorClientSQLite {
         };
     };
 
-	public async location_gcs_update(opts: ILocationGcsUpdate): Promise<true | string[] | IISQLiteServiceMessage> {
+    public async location_gcs_update(opts: ILocationGcsUpdate): Promise<true | string[] | IISQLiteServiceMessage> {
         const optsv = this.location_gcs_add_validate(opts.fields);
         if (Array.isArray(optsv)) return optsv;
         const fields = this.filter_bind_value_fields(Object.entries(optsv));
