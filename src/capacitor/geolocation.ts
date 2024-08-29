@@ -25,9 +25,20 @@ export class CapacitorClientGeolocation implements IClientGeolocation {
 
     public async current(): Promise<IClientGeolocationPosition | undefined | IGeolocationErrorMessage> {
         try {
+            //const permitted = await this.has_permissions();
+            //if (!permitted) return `permissions-required`;
             const position = await this.get_current_position();
             return position;
         } catch (e) { };
+    }
+
+    public async has_permissions(): Promise<boolean> {
+        try {
+            const permissions = await Geolocation.checkPermissions();
+            return permissions.location === `granted`;
+        } catch (e) {
+            return false;
+        };
     }
 }
 

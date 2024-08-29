@@ -32,7 +32,7 @@ export class CapacitorClientDialog implements IClientDialog {
                 inputPlaceholder,
                 inputText
             });
-            if (res && typeof res.value === `string`) return res.value;
+            if (res && typeof res.value === `string` && res.cancelled === false) return res.value;
             return false;
         } catch (e) {
             return false;

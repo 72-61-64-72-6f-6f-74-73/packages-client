@@ -135,7 +135,7 @@ export type IClientGeolocationPosition = {
 export type IGeolocationErrorMessage = `permissions-required`;
 
 export type IClientGeolocation = {
-    current(): Promise<IClientGeolocationPosition | undefined | IGeolocationErrorMessage>
+    current(): Promise<IClientGeolocationPosition | undefined | IGeolocationErrorMessage>;
 };
 
 export type IClientHttpOpts = {
