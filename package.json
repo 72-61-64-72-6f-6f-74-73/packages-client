@@ -21,6 +21,7 @@
         "@capacitor/share": "^6.0.0",
         "@capacitor/splash-screen": "^6.0.0",
         "@capacitor/status-bar": "^6.0.0",
+        "@noble/hashes": "^1.4.0",
         "@nostr-dev-kit/ndk": "^2.7.1",
         "@radroots/capacitor-bluetooth-le": "workspace:*",
         "@radroots/capacitor-date-picker": "workspace:*",
@@ -29,7 +30,8 @@
         "@radroots/capacitor-sqlite": "workspace:*",
         "@radroots/capacitor-wifi": "workspace:*",
         "@radroots/models": "workspace:*",
-        "@radroots/utils": "workspace:*"
+        "@radroots/utils": "workspace:*",
+        "nostr-tools": "^2.7.2"
     },
     "devDependencies": {
         "typescript": "^5.3.3"
