@@ -4,6 +4,7 @@ import { type ScanResult } from '@radroots/capacitor-bluetooth-le';
 import { IOSSettings, type AndroidSettings } from '@radroots/capacitor-native-settings';
 import { type ConnectToWifiResult, type GetCurrentWifiResult, type PermissionStatus, type ScanWifiResult } from '@radroots/capacitor-wifi';
 import { type ErrorResponse } from '@radroots/utils';
+import { CapacitorClientSQLite } from './capacitor/sql';
 
 export type IClient = {
     nostr: IClientNostr;
@@ -23,6 +24,7 @@ export type IClient = {
     window: IClientWindow;
     ble: IClientBluetoothLe;
     settings: IClientSettings;
+    db: IClientDb;
 };
 
 export type IClientNostr = {
@@ -31,6 +33,8 @@ export type IClientNostr = {
 };
 
 export type IClientPlatform = `androiď` | `ios` | `web`;
+
+export type IClientDb = CapacitorClientSQLite;
 
 export type IClientKeystore = {
     init: () => Promise<void>;
