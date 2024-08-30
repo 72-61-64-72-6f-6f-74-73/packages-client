@@ -1,4 +1,5 @@
 import { Geolocation, type Position } from '@capacitor/geolocation';
+import { err_msg } from '@radroots/utils';
 import type { IClientGeolocation, IClientGeolocationPosition, IGeolocationErrorMessage } from '../types';
 import { fmt_location_coords } from '../utils';
 
@@ -19,14 +20,13 @@ export class CapacitorClientGeolocation implements IClientGeolocation {
             const position = await Geolocation.getCurrentPosition();
             return this.parse_geolocation_position(position);
         } catch (e) {
-            if (typeof e.errorMessage === `string` && String(e.errorMessage).includes(`The operation couldn’t be completed`)) return `permissions-required`;
+            const { error } = err_msg(e);
+            if (error.includes(`The operation couldn’t be completed`)) return `permissions-required`;
         };
     }
 
     public async current(): Promise<IClientGeolocationPosition | undefined | IGeolocationErrorMessage> {
         try {
-            //const permitted = await this.has_permissions();
-            //if (!permitted) return `permissions-required`;
             const position = await this.get_current_position();
             return position;
         } catch (e) { };
