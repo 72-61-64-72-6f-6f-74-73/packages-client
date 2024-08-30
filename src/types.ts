@@ -1,10 +1,12 @@
 import { type BatteryInfo, type DeviceInfo } from '@capacitor/device';
+import { type NDKEvent } from "@nostr-dev-kit/ndk";
 import { type ScanResult } from '@radroots/capacitor-bluetooth-le';
 import { IOSSettings, type AndroidSettings } from '@radroots/capacitor-native-settings';
 import { type ConnectToWifiResult, type GetCurrentWifiResult, type PermissionStatus, type ScanWifiResult } from '@radroots/capacitor-wifi';
 import { type ErrorResponse } from '@radroots/utils';
 
 export type IClient = {
+    nostr: IClientNostr;
     platform: IClientPlatform;
     keystore: IClientKeystore;
     device: IClientDevice;
@@ -21,6 +23,10 @@ export type IClient = {
     window: IClientWindow;
     ble: IClientBluetoothLe;
     settings: IClientSettings;
+};
+
+export type IClientNostr = {
+    ev: IClientNostrEvents;
 };
 
 export type IClientPlatform = `androiď` | `ios` | `web`;
@@ -250,4 +256,8 @@ export type IClientSettingsOpen = IClientSettingsOpenAndroid | IClientSettingsOp
 
 export type IClientSettings = {
     open(opts: IClientSettingsOpen): Promise<boolean>;
+};
+
+export type IClientNostrEvents = {
+    first_tag_value(event: NDKEvent, tag_name: string): string;
 };

@@ -1,5 +1,6 @@
 
 import { Capacitor } from "@capacitor/core";
+import { ClientNostr } from "../nostr";
 import type { IClient, IClientBluetoothLe, IClientBrowser, IClientCamera, IClientDatePicker, IClientDevice, IClientDialog, IClientGeolocation, IClientHaptics, IClientHttp, IClientKeystore, IClientNetwork, IClientPlatform, IClientPreferences, IClientShare, IClientWifi, IClientWindow } from "../types";
 import { parse_platform } from "../utils";
 import { CapacitorClientBluetoothLe } from "./bluetooth-le";
@@ -21,6 +22,7 @@ import { CapacitorClientWifi } from "./wifi";
 import { CapacitorClientWindow } from "./window";
 
 export class ClientCapacitor implements IClient {
+    private _nostr: ClientNostr = new ClientNostr();
     private _platform: IClientPlatform = parse_platform(Capacitor.getPlatform());
     private _keystore: IClientKeystore = new CapacitorClientKeystore();
     private _device: IClientDevice = new CapacitorClientDevice();
@@ -39,6 +41,10 @@ export class ClientCapacitor implements IClient {
     private _camera: IClientCamera = new CapacitorClientCamera();
     private _db: CapacitorClientSQLite = new CapacitorClientSQLite();
     private _settings: CapacitorClientSettings = new CapacitorClientSettings();
+
+    public get nostr() {
+        return this._nostr;
+    }
 
     public get platform() {
         return this._platform;
