@@ -45,7 +45,7 @@ export class ClientNostrLib implements IClientNostrLib {
      * @returns nostr public key hex
      */
     public public_key(secret_key_hex: string | undefined): string {
-        if (!secret_key_hex) throw new Error('Error: Secret key hex');
+        if (!secret_key_hex) return ``;
         const bytes = this.get_key_bytes(secret_key_hex);
         const hex = getPublicKey(bytes)
         return hex;
@@ -56,7 +56,7 @@ export class ClientNostrLib implements IClientNostrLib {
      * @returns nostr public key npub
      */
     public npub(public_key_hex: string | undefined): string {
-        if (!public_key_hex) throw new Error(`Error: public_key_hex must be defined`);
+        if (!public_key_hex) return ``;
         const npub = nip19.npubEncode(public_key_hex)
         return npub;
     }
