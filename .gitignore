@@ -31,3 +31,4 @@ _tmp
 .vscode
 notes*.txt
 justfile
+git-diff.txt

@@ -606,4 +606,55 @@ export class CapacitorClientSQLite {
             return this.append_logs("*", [], query, ["nostr_note_update", e]);
         };
     };
+
+	public async get_trade_product_location(): Promise<any[] | IISQLiteServiceMessage> {
+        const bind_values = undefined;
+        const query = "SELECT * FROM trade_product_location;";
+        try {
+            const response = await this.select(query, bind_values);
+            if (typeof response === "string") {
+                return response;
+            } else if (response && Array.isArray(response.values)) {
+                return response.values;
+            }
+            return "*-result";
+        } catch (e) {
+            const { error } = err_msg(e, "connect");
+            return this.append_logs("*", bind_values, query, ["get_trade_product_location", error]);
+        };
+    };
+
+    public async set_trade_product_location(opts: { trade_product_id: string; location_gcs_id: string }): Promise<true | IISQLiteServiceMessage> {
+        const bind_values = [opts.trade_product_id, opts.location_gcs_id];
+        const query = "INSERT INTO trade_product_location (tb_tploc_0, tb_tploc_1) VALUES ($1, $2);";
+        try {
+            const response = await this.execute(query, bind_values);
+            if (typeof response === "string") {
+                return response;
+            } else if (typeof response.changes?.changes === "number" && response.changes.changes > 0) {
+                return true;
+            }
+            return "*-result";
+        } catch (e) {
+            const { error } = err_msg(e, "connect");
+            return this.append_logs("*", bind_values, query, ["set_trade_product_location", error]);
+        };
+    };    
+
+    public async unset_trade_product_location(opts: { trade_product_id: string; location_gcs_id: string; }): Promise<true | IISQLiteServiceMessage> {
+        const bind_values = [opts.trade_product_id, opts.location_gcs_id];
+        const query = "DELETE FROM trade_product_location WHERE tb_tploc_0 = $1 AND tb_tploc_1 = $2;";
+        try {
+            const response = await this.execute(query, bind_values);
+            if (typeof response === "string") {
+                return response;
+            } else if (typeof response.changes?.changes === "number" && response.changes.changes > 0) {
+                return true;
+            }
+            return "*-result";
+        } catch (e) {
+            const { error } = err_msg(e, "connect");
+            return this.append_logs("*", bind_values, query, ["unset_trade_product_location", error]);
+        };
+    };
 };
