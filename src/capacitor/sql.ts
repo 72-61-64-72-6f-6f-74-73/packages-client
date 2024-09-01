@@ -1,7 +1,7 @@
 import { CapacitorSQLite, SQLiteConnection, SQLiteDBConnection, type DBSQLiteValues, type capSQLiteChanges, type capSQLiteUpgradeOptions, type capSQLiteVersionUpgrade } from '@radroots/capacitor-sqlite';
 import { Capacitor } from '@capacitor/core';
 import { time_created_on, uuidv4, err_msg } from '@radroots/utils';
-import { type IModelsQueryParam, type IModelsQueryBindValue, type IModelsQueryBindValueTuple, type IModelsQueryBindValueOpt, models_initial_upgrade, parse_location_gcs_form_field_types, location_gcs_sort, type ILocationGcsGetList, type ILocationGcsGet, type ILocationGcsUpdate, type ILocationGcsQueryBindValues, type ILocationGcsQueryBindValuesKey, type ILocationGcsQueryBindValuesTuple, parse_location_gcs, parse_location_gcss, type LocationGcs, type LocationGcsFields, type LocationGcsFormFields, LocationGcsSchema, parse_nostr_note_form_field_types, nostr_note_sort, type INostrNoteGetList, type INostrNoteGet, type INostrNoteUpdate, type INostrNoteQueryBindValues, type INostrNoteQueryBindValuesKey, type INostrNoteQueryBindValuesTuple, parse_nostr_note, parse_nostr_notes, type NostrNote, type NostrNoteFields, type NostrNoteFormFields, NostrNoteSchema} from "@radroots/models";
+import { type IModelsQueryParam, type IModelsQueryBindValue, type IModelsQueryBindValueTuple, type IModelsQueryBindValueOpt, models_initial_upgrade, parse_location_gcs_form_field_types, location_gcs_sort, type ILocationGcsGetList, type ILocationGcsGet, type ILocationGcsUpdate, type ILocationGcsQueryBindValues, type ILocationGcsQueryBindValuesKey, type ILocationGcsQueryBindValuesTuple, parse_location_gcs, parse_location_gcss, type LocationGcs, type LocationGcsFields, type LocationGcsFormFields, LocationGcsSchema, parse_trade_product_form_field_types, trade_product_sort, type ITradeProductGetList, type ITradeProductGet, type ITradeProductUpdate, type ITradeProductQueryBindValues, type ITradeProductQueryBindValuesKey, type ITradeProductQueryBindValuesTuple, parse_trade_product, parse_trade_products, type TradeProduct, type TradeProductFields, type TradeProductFormFields, TradeProductSchema, parse_nostr_note_form_field_types, nostr_note_sort, type INostrNoteGetList, type INostrNoteGet, type INostrNoteUpdate, type INostrNoteQueryBindValues, type INostrNoteQueryBindValuesKey, type INostrNoteQueryBindValuesTuple, parse_nostr_note, parse_nostr_notes, type NostrNote, type NostrNoteFields, type NostrNoteFormFields, NostrNoteSchema} from "@radroots/models";
 
 const models_upgrades = [
     {
@@ -22,6 +22,9 @@ export type IISQLiteServiceOpenDatabase = {
 
 export type IISQLiteServiceMessage = 
 	| "*-location-gcs-geohash-unique"
+	| "*-trade-product-key-unique"
+	| "*-trade-product-lot-unique"
+	| "*-trade-product-varietal-unique"
 	| "*-nostr-note-ev-id-unique"
 	| "*-validate"
     | "*-result"
@@ -184,6 +187,9 @@ export class CapacitorClientSQLite {
         } catch (e) {
             const { error } = err_msg(e, "execute");
             if (String(e).includes("UNIQUE constraint failed: location_gcs.geohash")) return "*-location-gcs-geohash-unique";
+			else if (String(e).includes("UNIQUE constraint failed: trade_product.key")) return "*-trade-product-key-unique";
+			else if (String(e).includes("UNIQUE constraint failed: trade_product.lot")) return "*-trade-product-lot-unique";
+			else if (String(e).includes("UNIQUE constraint failed: trade_product.varietal")) return "*-trade-product-varietal-unique";
 			else if (String(e).includes("UNIQUE constraint failed: nostr_note.ev_id")) return "*-nostr-note-ev-id-unique";
             return this.append_logs("*-exe", bv_o, query, error);
         };
@@ -357,6 +363,127 @@ export class CapacitorClientSQLite {
             return "*-result";
         } catch (e) {
             return this.append_logs("*", [], query, ["location_gcs_update", e]);
+        };
+    };
+
+	private trade_product_add_validate(opts: TradeProductFormFields): TradeProductFields | string[] {
+        const opts_filtered = Object.entries(opts).reduce((acc: Record<string, (string | number)>, [key, value]) => {
+            if (!!value) {
+                switch (parse_trade_product_form_field_types(key)) {
+                    case "string":
+                        acc[key] = value;
+                        break;
+                    case "number":
+                        acc[key] = Number(value);
+                        break;
+                }
+            };
+            return acc;
+        }, {});
+        const trade_product_v = TradeProductSchema.safeParse(opts_filtered);
+        if (!trade_product_v.success) return trade_product_v.error.issues.map(i => i.message);
+        else return {
+            ...trade_product_v.data, 
+        };
+    };
+
+    public async trade_product_add(opts: TradeProductFormFields): Promise<{ id: string; } | string[] | IISQLiteServiceMessage> {
+        const optsv = this.trade_product_add_validate(opts);
+        if (Array.isArray(optsv)) return optsv;
+        const fields = Object.entries(optsv);
+        if (!fields.length) return "*-fields";
+		const id = uuidv4();
+        const bind_values_tup: IModelsQueryBindValueTuple[] = [
+			["id", id], 
+            ["created_at", time_created_on()]
+        ];
+        for (const field of this.filter_bind_value_fields(fields)) bind_values_tup.push(field);
+        const bind_values = bind_values_tup.map(([_, v]) => v);
+        const query = `INSERT INTO trade_product (${bind_values_tup.map(([k]) => k).join(", ")}) VALUES (${bind_values_tup.map((_, num) => `$${1 + num}`).join(", ")});`;
+        try {
+            const result = await this.execute(query, bind_values);
+            if (typeof result !== "string" && typeof result.changes?.changes === "number" && result.changes.changes > 0) return { id };      
+            else if (typeof result === "string") return result;
+            return "*-result";
+        } catch (e) {
+            return this.append_logs("*", bind_values, query, ["trade_product_add", e]);
+        };
+    };
+
+	private trade_product_query_bind_values = (opts: ITradeProductQueryBindValues): ITradeProductQueryBindValuesTuple => {
+        if ("id" in opts) return ["id", opts.id];
+		else return ["url", opts.url];
+    };
+
+	private trade_product_get_query_list = (opts: ITradeProductGetList): IModelsQueryParam => {
+        const sort = trade_product_sort[opts.sort || "newest"];
+        let query = "";
+        let bind_values = null;
+        if (opts.list[0] === "all") {
+            query = `SELECT * FROM trade_product ORDER BY ${sort};`;
+        }
+        if (!query) throw new Error("Error: Missing query (trade_product_get_query_list)")
+        return {
+            query,
+            bind_values
+        };
+    };
+
+	private trade_product_get_parse_opts = (opts: ITradeProductGet): IModelsQueryParam => {
+        if ("list" in opts) return this.trade_product_get_query_list(opts);
+        else {
+            const bv_tup = this.trade_product_query_bind_values(opts);
+            return {
+                query: `SELECT * FROM trade_product WHERE ${bv_tup[0]} = $1;`,
+                bind_values: [bv_tup[1]]
+            };
+        };
+    };
+
+	public async trade_product_get(opts: ITradeProductGet): Promise<TradeProduct[] | IISQLiteServiceMessage> {
+        const { query, bind_values } = this.trade_product_get_parse_opts(opts);
+        try {
+            const response = await this.select(query, bind_values);
+            if (typeof response === "string") return response;
+            else {
+                const result = parse_trade_products(response);
+                if (result) return result;
+            }
+            return "*-result";
+        } catch (e) {
+            return this.append_logs("*", opts, query, ["trade_product_get", e]);
+        };
+    };
+
+	public async trade_product_delete(opts: ITradeProductQueryBindValues): Promise<true | IISQLiteServiceMessage> {
+        const bv_tup = this.trade_product_query_bind_values(opts);
+        const bind_values = [bv_tup[1]];
+        const query = `DELETE FROM trade_product WHERE ${bv_tup[0]} = $1;`;
+        try {
+            const response = await this.execute(query, bind_values);
+            if (typeof response === "string") return response;
+            else if (typeof response.changes?.changes === "number" && response.changes.changes > 0) return true;
+            return "*-result";
+        } catch (e) {
+            return this.append_logs("*", [], query, ["trade_product_delete", e]);
+        };
+    };
+
+	public async trade_product_update(opts: ITradeProductUpdate): Promise<true | string[] | IISQLiteServiceMessage> {
+        const optsv = this.trade_product_add_validate(opts.fields);
+        if (Array.isArray(optsv)) return optsv;
+        const fields = this.filter_bind_value_fields(Object.entries(optsv));
+        if (!fields.length) return "*-fields";
+        const bv_tup = this.trade_product_query_bind_values(opts.on);
+        const bind_values = [bv_tup[1], ...fields.map(([_, v]) => v)];
+        const query = `UPDATE trade_product SET ${fields.map(([k], num) => `${k} = $${1 + num}`).join(", ")} WHERE ${bv_tup[0]} = $1;`;
+        try {
+            const response = await this.execute(query, bind_values);
+            if (typeof response === "string") return response;
+            else if (typeof response.changes?.changes === "number" && response.changes.changes > 0) return true;
+            return "*-result";
+        } catch (e) {
+            return this.append_logs("*", [], query, ["trade_product_update", e]);
         };
     };
 
