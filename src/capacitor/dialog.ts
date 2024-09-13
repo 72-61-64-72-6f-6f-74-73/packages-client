@@ -1,5 +1,5 @@
-import { Dialog } from "@capacitor/dialog";
-import type { IClientDialog, IClientDialogPrompt } from "../types";
+import { type ConfirmOptions, Dialog } from "@capacitor/dialog";
+import type { IClientDialog, IClientDialogConfirmOpts, IClientDialogPrompt } from "../types";
 
 export class CapacitorClientDialog implements IClientDialog {
     public async alert(message: string): Promise<boolean> {
@@ -11,9 +11,18 @@ export class CapacitorClientDialog implements IClientDialog {
         };
     }
 
-    public async confirm(message: string): Promise<boolean> {
+    public async confirm(opts: IClientDialogConfirmOpts): Promise<boolean> {
         try {
-            const res = await Dialog.confirm({ message });
+            const message = typeof opts === `string` ? opts : opts.message;
+            const options: ConfirmOptions = {
+                message
+            };
+
+            if (typeof opts !== `string`) {
+                if (opts.cancel_label) options.cancelButtonTitle = opts.cancel_label;
+                if (opts.ok_label) options.okButtonTitle = opts.ok_label;
+            }
+            const res = await Dialog.confirm(options);
             if (res && typeof res.value === `boolean`) return res.value;
             return false;
         } catch (e) {

@@ -115,9 +115,11 @@ export type IClientDialogPrompt = {
     input_text?: string;
 };
 
+export type IClientDialogConfirmOpts = string | { message: string; cancel_label?: string; ok_label?: string; };
+
 export type IClientDialog = {
     alert(message: string): Promise<boolean>;
-    confirm(message: string): Promise<boolean>;
+    confirm(opts: IClientDialogConfirmOpts): Promise<boolean>;
     prompt(opts: IClientDialogPrompt): Promise<string | false>;
 };
 
