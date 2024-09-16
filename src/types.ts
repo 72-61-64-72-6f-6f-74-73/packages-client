@@ -153,7 +153,7 @@ export type IClientGeolocation = {
 
 export type IClientHttpOpts = {
     url: string;
-    method?: string;
+    method: `get` | `post`;
     params?: {
         [key: string]: string | string[];
     };
@@ -175,8 +175,7 @@ export type IClientHttpResponse = {
 };
 
 export type IClientHttp = {
-    get(opts: IClientHttpOpts): Promise<IClientHttpResponse | undefined>;
-    post(opts: IClientHttpOpts): Promise<IClientHttpResponse | undefined>;
+    fetch(opts: IClientHttpOpts): Promise<IClientHttpResponse | string>;
 };
 
 export type IClientWindow = {

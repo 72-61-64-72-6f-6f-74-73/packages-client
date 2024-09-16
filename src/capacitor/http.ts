@@ -1,11 +1,11 @@
-import { CapacitorHttp } from '@capacitor/core';
+import { CapacitorHttp, type HttpOptions } from '@capacitor/core';
 import type { IClientHttp, IClientHttpOpts, IClientHttpResponse } from '../types';
 
 export class CapacitorClientHttp implements IClientHttp {
-    public async get(opts: IClientHttpOpts): Promise<IClientHttpResponse | undefined> {
+    public async fetch(opts: IClientHttpOpts): Promise<IClientHttpResponse | string> {
         try {
-            const { url: url, method: method, params: params, data: data, headers: headers, read_timeout: readTimeout, connect_timeout: connectTimeout } = opts;
-            const res: IClientHttpResponse = await CapacitorHttp.get({
+            const { url, method, params, data, headers, read_timeout: readTimeout, connect_timeout: connectTimeout } = opts;
+            const options: HttpOptions = {
                 url,
                 method,
                 params,
@@ -13,24 +13,16 @@ export class CapacitorClientHttp implements IClientHttp {
                 headers,
                 readTimeout,
                 connectTimeout,
-            });
-            return res;
-        } catch (e) { };
-    }
-
-    public async post(opts: IClientHttpOpts): Promise<IClientHttpResponse | undefined> {
-        try {
-            const { url: url, method: method, params: params, data: data, headers: headers, read_timeout: readTimeout, connect_timeout: connectTimeout } = opts;
-            const response: IClientHttpResponse = await CapacitorHttp.post({
-                url,
-                method,
-                params,
-                data,
-                headers,
-                readTimeout,
-                connectTimeout,
-            });
-            return response;
-        } catch (e) { };
+            };
+            if (method === `get`) {
+                const res: IClientHttpResponse = await CapacitorHttp.get(options);
+                return res;
+            } else {
+                const res: IClientHttpResponse = await CapacitorHttp.post(options);
+                return res;
+            }
+        } catch (e) {
+            return String(e);
+        };
     }
 }
