@@ -4,7 +4,7 @@ import { type ScanResult } from '@radroots/capacitor-bluetooth-le';
 import { IOSSettings, type AndroidSettings } from '@radroots/capacitor-native-settings';
 import { type ConnectToWifiResult, type GetCurrentWifiResult, type PermissionStatus, type ScanWifiResult } from '@radroots/capacitor-wifi';
 import { type ErrorResponse } from '@radroots/utils';
-import { CapacitorClientSQLite } from './capacitor/sql';
+import { CapacitorClientSQLite } from './capacitor/sqlite';
 
 export type IClient = {
     nostr: IClientNostr;
