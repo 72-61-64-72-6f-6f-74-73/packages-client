@@ -1,5 +1,5 @@
 import { type capSQLiteChanges, type DBSQLiteValues, SQLiteDBConnection } from "@radroots/capacitor-sqlite";
-import { type IModelsQueryValue, type IModelsQueryParam, type IModelsQueryBindValue, type IModelsQueryBindValueTuple, type IModelsQueryBindValueOpt, parse_location_gcs_form_fields, location_gcs_sort, type ILocationGcsGetList, type ILocationGcsGet, type ILocationGcsUpdate, type ILocationGcsQueryBindValues, type ILocationGcsQueryBindValuesKey, type ILocationGcsQueryBindValuesTuple, parse_location_gcs, parse_location_gcs_list, type LocationGcs, type LocationGcsFields, type LocationGcsFormFields, LocationGcsSchema, parse_trade_product_form_fields, trade_product_sort, type ITradeProductGetList, type ITradeProductGet, type ITradeProductUpdate, type ITradeProductQueryBindValues, type ITradeProductQueryBindValuesKey, type ITradeProductQueryBindValuesTuple, parse_trade_product, parse_trade_product_list, type TradeProduct, type TradeProductFields, type TradeProductFormFields, TradeProductSchema} from "@radroots/models";
+import { type IModelsQueryValue, type IModelsQueryParam, type IModelsQueryBindValue, type IModelsQueryBindValueTuple, type IModelsQueryBindValueOpt, parse_location_gcs_form_fields, location_gcs_sort, type ILocationGcsGetList, type ILocationGcsGet, type ILocationGcsUpdate, type ILocationGcsQueryBindValues, type ILocationGcsQueryBindValuesKey, type ILocationGcsQueryBindValuesTuple, parse_location_gcs, parse_location_gcs_list, type LocationGcs, type LocationGcsFields, type LocationGcsFormFields, LocationGcsSchema, parse_trade_product_form_fields, trade_product_sort, type ITradeProductGetList, type ITradeProductGet, type ITradeProductUpdate, type ITradeProductQueryBindValues, type ITradeProductQueryBindValuesKey, type ITradeProductQueryBindValuesTuple, parse_trade_product, parse_trade_product_list, type TradeProduct, type TradeProductFields, type TradeProductFormFields, TradeProductSchema, parse_nostr_profile_form_fields, nostr_profile_sort, type INostrProfileGetList, type INostrProfileGet, type INostrProfileUpdate, type INostrProfileQueryBindValues, type INostrProfileQueryBindValuesKey, type INostrProfileQueryBindValuesTuple, parse_nostr_profile, parse_nostr_profile_list, type NostrProfile, type NostrProfileFields, type NostrProfileFormFields, NostrProfileSchema, NostrProfileMetadataSchema} from "@radroots/models";
 import { err_msg, time_created_on, uuidv4 } from "@radroots/utils";
 import { sqlite_svc, sqlite_version_svc, type IISQLiteServiceOpenDatabase } from "./sqlite_lib";
 
@@ -113,19 +113,20 @@ export class CapacitorClientSQLite {
     }
     
     private location_gcs_add_validate(fields: LocationGcsFormFields): LocationGcsFields | string[] {
-        const fields_record = Object.entries(fields).filter(([_, v]) => !!v).reduce((acc: Record<string, IModelsQueryValue>, i) => {
+        const fields_r = Object.entries(fields).filter(([_, v]) => !!v).reduce((acc: Record<string, IModelsQueryValue>, i) => {
             const [key, val] = parse_location_gcs_form_fields(i);
             acc[key] = val;
             return acc;
         }, {});
-        const fields_schema = LocationGcsSchema.safeParse(fields_record);
-        if (!fields_schema.success) return fields_schema.error.issues.map(i => i.message);
+        const schema = LocationGcsSchema;
+        const parsed_schema = schema.safeParse(fields_r);
+        if (!parsed_schema.success) return parsed_schema.error.issues.map(i => i.message);
         else return {
-            ...fields_schema.data, 
+            ...parsed_schema.data
         };
     }
 
-    public async location_gcs_add(opts: LocationGcsFormFields): Promise<{ id: string;  } | string[] | ICapacitorClientSQLiteMessage> {
+    public async location_gcs_add(opts: LocationGcsFormFields): Promise<{ id: string; } | string[] | ICapacitorClientSQLiteMessage> {
         const opts_v = this.location_gcs_add_validate(opts);
         if (Array.isArray(opts_v)) return opts_v;
         const fields = Object.entries(opts_v);
@@ -170,10 +171,10 @@ export class CapacitorClientSQLite {
     private location_gcs_get_parse_opts = (opts: ILocationGcsGet): IModelsQueryParam => {
         if ("list" in opts) return this.location_gcs_get_query_list(opts);
         else {
-            const bv_tup = this.location_gcs_query_bind_values(opts);
+            const [bv_k, bv_v] = this.location_gcs_query_bind_values(opts);
             return {
-                query: `SELECT * FROM location_gcs WHERE ${bv_tup[0]} = $1;`,
-                bind_values: [bv_tup[1]]
+                query: `SELECT * FROM location_gcs WHERE ${bv_k} = $1;`,
+                bind_values: [bv_v]
             };
         };
     }
@@ -226,19 +227,20 @@ export class CapacitorClientSQLite {
     }
     
     private trade_product_add_validate(fields: TradeProductFormFields): TradeProductFields | string[] {
-        const fields_record = Object.entries(fields).filter(([_, v]) => !!v).reduce((acc: Record<string, IModelsQueryValue>, i) => {
+        const fields_r = Object.entries(fields).filter(([_, v]) => !!v).reduce((acc: Record<string, IModelsQueryValue>, i) => {
             const [key, val] = parse_trade_product_form_fields(i);
             acc[key] = val;
             return acc;
         }, {});
-        const fields_schema = TradeProductSchema.safeParse(fields_record);
-        if (!fields_schema.success) return fields_schema.error.issues.map(i => i.message);
+        const schema = TradeProductSchema;
+        const parsed_schema = schema.safeParse(fields_r);
+        if (!parsed_schema.success) return parsed_schema.error.issues.map(i => i.message);
         else return {
-            ...fields_schema.data, 
+            ...parsed_schema.data
         };
     }
 
-    public async trade_product_add(opts: TradeProductFormFields): Promise<{ id: string;  } | string[] | ICapacitorClientSQLiteMessage> {
+    public async trade_product_add(opts: TradeProductFormFields): Promise<{ id: string; } | string[] | ICapacitorClientSQLiteMessage> {
         const opts_v = this.trade_product_add_validate(opts);
         if (Array.isArray(opts_v)) return opts_v;
         const fields = Object.entries(opts_v);
@@ -283,10 +285,10 @@ export class CapacitorClientSQLite {
     private trade_product_get_parse_opts = (opts: ITradeProductGet): IModelsQueryParam => {
         if ("list" in opts) return this.trade_product_get_query_list(opts);
         else {
-            const bv_tup = this.trade_product_query_bind_values(opts);
+            const [bv_k, bv_v] = this.trade_product_query_bind_values(opts);
             return {
-                query: `SELECT * FROM trade_product WHERE ${bv_tup[0]} = $1;`,
-                bind_values: [bv_tup[1]]
+                query: `SELECT * FROM trade_product WHERE ${bv_k} = $1;`,
+                bind_values: [bv_v]
             };
         };
     }
@@ -335,6 +337,120 @@ export class CapacitorClientSQLite {
             return "*-result";
         } catch (e) {
             return this.append_logs("*", [], query, ["trade_product_update", e]);
+        };
+    }
+    
+    private nostr_profile_add_validate(fields: NostrProfileFormFields): NostrProfileFields | string[] {
+        const fields_r = Object.entries(fields).filter(([_, v]) => !!v).reduce((acc: Record<string, IModelsQueryValue>, i) => {
+            const [key, val] = parse_nostr_profile_form_fields(i);
+            acc[key] = val;
+            return acc;
+        }, {});
+        const schema = NostrProfileSchema.and(NostrProfileMetadataSchema);
+        const parsed_schema = schema.safeParse(fields_r);
+        if (!parsed_schema.success) return parsed_schema.error.issues.map(i => i.message);
+        else return {
+            ...parsed_schema.data
+        };
+    }
+
+    public async nostr_profile_add(opts: NostrProfileFormFields): Promise<{ id: string; } | string[] | ICapacitorClientSQLiteMessage> {
+        const opts_v = this.nostr_profile_add_validate(opts);
+        if (Array.isArray(opts_v)) return opts_v;
+        const fields = Object.entries(opts_v);
+        if (!fields.length) return "*-fields";
+        const id = uuidv4();
+        const bind_values_tup: IModelsQueryBindValueTuple[] = [
+            ["id", id],
+            ["created_at", time_created_on()]
+        ];
+        for (const field of this.filter_bind_value_fields(fields)) bind_values_tup.push(field);
+        const bind_values = bind_values_tup.map(([_, v]) => v);
+        const query = `INSERT INTO nostr_profile (${bind_values_tup.map(([k]) => k).join(", ")}) VALUES (${bind_values_tup.map((_, num) => `$${1 + num}`).join(", ")});`;
+        try {
+            const result = await this.execute(query, bind_values);
+            if (typeof result !== "string" && typeof result.changes?.changes === "number" && result.changes.changes > 0) return { id,  };      
+            else if (typeof result === "string") return result;
+            return "*-result";
+        } catch (e) {
+            return this.append_logs("*", bind_values, query, ["nostr_profile_add", e]);
+        };
+    }
+
+    private nostr_profile_query_bind_values = (opts: INostrProfileQueryBindValues): INostrProfileQueryBindValuesTuple => {
+        if ("public_key" in opts) return ["public_key", opts.public_key];
+        else return ["nip05", opts.nip05];
+    }
+
+    private nostr_profile_get_query_list = (opts: INostrProfileGetList): IModelsQueryParam => {
+        const sort = nostr_profile_sort[opts.sort || "newest"];
+        let query = "";
+        let bind_values = null;
+        if (opts.list[0] === "all") {
+            query = `SELECT * FROM nostr_profile ORDER BY ${sort};`;
+        }
+        if (!query) throw new Error("Error: Missing query (nostr_profile_get_query_list)")
+        return {
+            query,
+            bind_values
+        };
+    }
+
+    private nostr_profile_get_parse_opts = (opts: INostrProfileGet): IModelsQueryParam => {
+        if ("list" in opts) return this.nostr_profile_get_query_list(opts);
+        else {
+            const [bv_k, bv_v] = this.nostr_profile_query_bind_values(opts);
+            return {
+                query: `SELECT * FROM nostr_profile WHERE ${bv_k} = $1;`,
+                bind_values: [bv_v]
+            };
+        };
+    }
+
+    public async nostr_profile_get(opts: INostrProfileGet): Promise<NostrProfile[] | ICapacitorClientSQLiteMessage> {
+        const { query, bind_values } = this.nostr_profile_get_parse_opts(opts);
+        try {
+            const response = await this.select(query, bind_values);
+            if (typeof response === "string") return response;
+            else {
+                const result = parse_nostr_profile_list(response);
+                if (result) return result;
+            }
+            return "*-result";
+        } catch (e) {
+            return this.append_logs("*", opts, query, ["nostr_profile_get", e]);
+        };
+    }
+
+    public async nostr_profile_delete(opts: INostrProfileQueryBindValues): Promise<true | ICapacitorClientSQLiteMessage> {
+        const bv_tup = this.nostr_profile_query_bind_values(opts);
+        const bind_values = [bv_tup[1]];
+        const query = `DELETE FROM nostr_profile WHERE ${bv_tup[0]} = $1;`;
+        try {
+            const response = await this.execute(query, bind_values);
+            if (typeof response === "string") return response;
+            else if (typeof response.changes?.changes === "number" && response.changes.changes > 0) return true;
+            return "*-result";
+        } catch (e) {
+            return this.append_logs("*", [], query, ["nostr_profile_delete", e]);
+        };
+    }
+
+    public async nostr_profile_update(opts: INostrProfileUpdate): Promise<true | string[] | ICapacitorClientSQLiteMessage> {
+        const opts_v = this.nostr_profile_add_validate(opts.fields);
+        if (Array.isArray(opts_v)) return opts_v;
+        const fields = this.filter_bind_value_fields(Object.entries(opts_v));
+        if (!fields.length) return "*-fields";
+        const bv_tup = this.nostr_profile_query_bind_values(opts.on);
+        const bind_values = [bv_tup[1], ...fields.map(([_, v]) => v)];
+        const query = `UPDATE nostr_profile SET ${fields.map(([k], num) => `${k} = $${1 + num}`).join(", ")} WHERE ${bv_tup[0]} = $1;`;
+        try {
+            const response = await this.execute(query, bind_values);
+            if (typeof response === "string") return response;
+            else if (typeof response.changes?.changes === "number" && response.changes.changes > 0) return true;
+            return "*-result";
+        } catch (e) {
+            return this.append_logs("*", [], query, ["nostr_profile_update", e]);
         };
     }
 };
