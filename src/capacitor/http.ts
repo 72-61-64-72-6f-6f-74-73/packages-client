@@ -21,8 +21,7 @@ export class CapacitorClientHttp implements IClientHttp {
                 return res;
             }
         } catch (e) {
-            const error_message = `${e.code}: ${e.message}`;
-            return error_message;
+            return String(e);
         };
     }
 }
