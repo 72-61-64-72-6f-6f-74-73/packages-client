@@ -153,7 +153,7 @@ export type IClientGeolocation = {
 
 export type IClientHttpOpts = {
     url: string;
-    method: `get` | `post`;
+    method?: `get` | `post`;
     params?: {
         [key: string]: string | string[];
     };

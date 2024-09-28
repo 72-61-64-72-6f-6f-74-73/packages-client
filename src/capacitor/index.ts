@@ -17,7 +17,7 @@ import { CapacitorClientNetwork } from "./network";
 import { CapacitorClientPreferences } from "./preferences";
 import { CapacitorClientSettings } from "./settings";
 import { CapacitorClientShare } from "./share";
-import { CapacitorClientSQLite, type ICapacitorClientSQLiteUpgrade } from "./sqlite";
+import { CapacitorClientSQLite, type ICapacitorClientSQLite } from "./sqlite";
 import { CapacitorClientWifi } from "./wifi";
 import { CapacitorClientWindow } from "./window";
 
@@ -43,9 +43,9 @@ export class ClientCapacitor implements IClient {
     private _db: CapacitorClientSQLite;
 
     constructor(opts: {
-        sqlite_upgrade: ICapacitorClientSQLiteUpgrade[];
+        sqlite: ICapacitorClientSQLite;
     }) {
-        this._db = new CapacitorClientSQLite(opts.sqlite_upgrade);
+        this._db = new CapacitorClientSQLite(opts.sqlite);
     }
 
     public get nostr() {

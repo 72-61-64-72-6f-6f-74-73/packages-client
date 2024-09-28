@@ -1,9 +1,9 @@
 import { Capacitor } from "@capacitor/core";
 import { CapacitorSQLite, type capSQLiteUpgradeOptions, type capSQLiteVersionUpgrade, SQLiteConnection, SQLiteDBConnection } from "@radroots/capacitor-sqlite";
-import type { IModelsQueryBindValueOpt } from "@radroots/models";
+import type { IModelsQueryBindValue } from "@radroots/models";
 import { err_msg } from "@radroots/utils";
 
-export type ISQLiteServiceDatabaseLog = { key: string, bind_values: IModelsQueryBindValueOpt[], query: string, e: any };
+export type ISQLiteServiceDatabaseLog = { key: string, bind_values: IModelsQueryBindValue[], query: string, e: any };
 export type IISQLiteServiceOpenDatabase = {
     platform: string;
     database: string;

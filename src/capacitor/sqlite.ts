@@ -1,31 +1,38 @@
-import { type capSQLiteChanges, type DBSQLiteValues, SQLiteDBConnection } from "@radroots/capacitor-sqlite";
-import { type IModelsQueryValue, type IModelsQueryParam, type IModelsQueryBindValue, type IModelsQueryBindValueTuple, type IModelsQueryBindValueOpt, parse_location_gcs_form_fields, location_gcs_sort, type ILocationGcsGetList, type ILocationGcsGet, type ILocationGcsUpdate, type ILocationGcsQueryBindValues, type ILocationGcsQueryBindValuesKey, type ILocationGcsQueryBindValuesTuple, parse_location_gcs, parse_location_gcs_list, type LocationGcs, type LocationGcsFields, type LocationGcsFormFields, LocationGcsSchema, LocationGcsUpdateSchema, parse_trade_product_form_fields, trade_product_sort, type ITradeProductGetList, type ITradeProductGet, type ITradeProductUpdate, type ITradeProductQueryBindValues, type ITradeProductQueryBindValuesKey, type ITradeProductQueryBindValuesTuple, parse_trade_product, parse_trade_product_list, type TradeProduct, type TradeProductFields, type TradeProductFormFields, TradeProductSchema, TradeProductUpdateSchema, parse_nostr_profile_form_fields, nostr_profile_sort, type INostrProfileGetList, type INostrProfileGet, type INostrProfileUpdate, type INostrProfileQueryBindValues, type INostrProfileQueryBindValuesKey, type INostrProfileQueryBindValuesTuple, parse_nostr_profile, parse_nostr_profile_list, type NostrProfile, type NostrProfileFields, type NostrProfileFormFields, NostrProfileSchema, NostrProfileUpdateSchema, NostrProfileMetadataSchema} from "@radroots/models";
+import { SQLiteDBConnection, type capSQLiteChanges, type DBSQLiteValues } from "@radroots/capacitor-sqlite";
+import { location_gcs_sort, LocationGcsSchema, LocationGcsUpdateSchema, nostr_profile_sort, nostr_relay_sort, NostrProfileMetadataSchema, NostrProfileSchema, NostrProfileUpdateSchema, NostrRelaySchema, NostrRelayUpdateSchema, parse_location_gcs_form_fields, parse_location_gcs_list, parse_nostr_profile_form_fields, parse_nostr_profile_list, parse_nostr_relay_form_fields, parse_nostr_relay_list, parse_trade_product_form_fields, parse_trade_product_list, trade_product_sort, TradeProductSchema, TradeProductUpdateSchema, type ILocationGcsGet, type ILocationGcsGetList, type ILocationGcsQueryBindValues, type ILocationGcsQueryBindValuesTuple, type ILocationGcsUpdate, type IModelsQueryBindValue, type IModelsQueryBindValueTuple, type IModelsQueryParam, type IModelsQueryValue, type INostrProfileGet, type INostrProfileGetList, type INostrProfileQueryBindValues, type INostrProfileQueryBindValuesTuple, type INostrProfileUpdate, type INostrRelayGet, type INostrRelayGetList, type INostrRelayQueryBindValues, type INostrRelayQueryBindValuesTuple, type INostrRelayUpdate, type ITradeProductGet, type ITradeProductGetList, type ITradeProductQueryBindValues, type ITradeProductQueryBindValuesTuple, type ITradeProductUpdate, type LocationGcs, type LocationGcsFields, type LocationGcsFormFields, type ModelsUniqueConstraintMessages, type NostrProfile, type NostrProfileFields, type NostrProfileFormFields, type NostrRelay, type NostrRelayFields, type NostrRelayFormFields, type TradeProduct, type TradeProductFields, type TradeProductFormFields } from "@radroots/models";
 import { err_msg, time_created_on, uuidv4 } from "@radroots/utils";
 import { sqlite_svc, sqlite_version_svc, type IISQLiteServiceOpenDatabase } from "./sqlite_lib";
 
-export type ICapacitorClientSQLiteUpgrade = { toVersion: number; statements: string[]; };
-export type ICapacitorClientSQLiteMessage = 
-	| "*-location-gcs-geohash-unique"
-	| "*-validate"
+export type ICapacitorClientSQLiteMessage =
+    | ModelsUniqueConstraintMessages
+    | "*-validate"
     | "*-result"
     | "*-fields"
     | "*-open"
     | "*-connect"
-    | "*-db"
+    | "*-connection"
     | "*-exe-result"
     | "*-exe"
     | "*-sel-result"
     | "*-sel"
     | "*";
 
+export type ICapacitorClientSQLiteUpgrade = { toVersion: number; statements: string[]; };
+export type ICapacitorClientSQLite = {
+    database: string;
+    upgrade: ICapacitorClientSQLiteUpgrade[];
+};
+
 export class CapacitorClientSQLite {
     private _platform = sqlite_svc.platform;
-    private _db_name: string | null = null;
-    private _db: SQLiteDBConnection | null = null;
+    private _conn: SQLiteDBConnection | null = null;
+    private _database: string;
     private _upgrade: ICapacitorClientSQLiteUpgrade[];
     private _version: number;
 
-    constructor(upgrade: ICapacitorClientSQLiteUpgrade[]) {
+    constructor(opts: ICapacitorClientSQLite) {
+        const { database, upgrade } = opts;
+        this._database = database;
         this._upgrade = upgrade;
         this._version = upgrade[upgrade.length - 1].toVersion;
     }
@@ -40,33 +47,38 @@ export class CapacitorClientSQLite {
         return log_key;
     }
 
+    private handle_errors(e: any, bind_values: IModelsQueryBindValue[], query: string): ICapacitorClientSQLiteMessage {
+        const { error } = err_msg(e, "execute");
+        if (String(e).includes("UNIQUE constraint failed: location_gcs.geohash")) return "*-location-gcs-geohash-unique";
+        else if (String(e).includes("UNIQUE constraint failed: nostr_relay.url")) return "*-nostr-relay-url-unique";
+        return this.append_logs("*-exe", bind_values, query, error);
+    }
+
     private filter_bind_value_fields(fields: IModelsQueryBindValueTuple[]): IModelsQueryBindValueTuple[] {
         return fields.filter(([_, v]) => !!v);
     }
 
-    private async execute(query: string, bv_o?: IModelsQueryBindValueOpt): Promise<capSQLiteChanges | ICapacitorClientSQLiteMessage> {
+    private async execute(query: string, bind_values: IModelsQueryBindValue[]): Promise<capSQLiteChanges | ICapacitorClientSQLiteMessage> {
         try {
-            if (!this._db) return "*-db";
-            const result = await this._db.run(query, bv_o ? bv_o : undefined);
-            if (sqlite_svc.platform === "web" && this._db_name) await sqlite_svc.save_to_store(this._db_name);
+            if (!this._conn) return "*-connection";
+            const result = await this._conn.run(query, bind_values.length ? bind_values : undefined);
+            if (sqlite_svc.platform === "web" && this._database) await sqlite_svc.save_to_store(this._database);
             if (result) return result;
-            return this.append_logs("*-exe-result", bv_o, query, result);
+            return this.append_logs("*-exe-result", bind_values, query, result);
         } catch (e) {
-            const { error } = err_msg(e, "execute");
-            if (String(e).includes("UNIQUE constraint failed: location_gcs.geohash")) return "*-location-gcs-geohash-unique";
-            return this.append_logs("*-exe", bv_o, query, error);
+            return this.handle_errors(e, bind_values, query);
         };
     }
 
-    private async select(query: string, bv_o?: IModelsQueryBindValueOpt): Promise<DBSQLiteValues | ICapacitorClientSQLiteMessage> {
+    private async select(query: string, bind_values: IModelsQueryBindValue[]): Promise<DBSQLiteValues | ICapacitorClientSQLiteMessage> {
         try {
-            if (!this._db) return "*-db";
-            const result = await this._db.query(query, bv_o ? bv_o : undefined);
+            if (!this._conn) return "*-connection";
+            const result = await this._conn.query(query, bind_values.length ? bind_values : undefined);
             if (result) return result;
-            return this.append_logs("*-sel-result", bv_o, query, result);
+            return this.append_logs("*-sel-result", bind_values, query, result);
         } catch (e) {
             const { error } = err_msg(e, "select");
-            return this.append_logs("*-sel", bv_o, query, error);
+            return this.append_logs("*-sel", bind_values, query, error);
         };
     }
 
@@ -77,12 +89,11 @@ export class CapacitorClientSQLite {
                 database: opts.database,
                 upgrade: opts.upgrade
             });
-            const db = await sqlite_svc.open_db(opts.database, opts.version, false);
+            const conn = await sqlite_svc.open_db(opts.database, opts.version, false);
             sqlite_version_svc.set_version(opts.database, opts.version);
-            if (!db) return "*-db";
+            if (!conn) return "*-connection";
             if (opts.platform === "web") await sqlite_svc.save_to_store(opts.database);
-            this._db = db;
-            this._db_name = opts.database;
+            this._conn = conn;
             return this.append_logs("*-open", [], "database opened", [new Date().toISOString()]);
         } catch (e) {
             const { error } = err_msg(e, "open");
@@ -90,19 +101,15 @@ export class CapacitorClientSQLite {
         };
     }
 
-    public get logs() {
-        return sqlite_svc.logs;
-    }
-
-    public async connect(database: string): Promise<true | ICapacitorClientSQLiteMessage> {
+    public async connect(): Promise<true | ICapacitorClientSQLiteMessage> {
         try {
-            this._db_name = database;
-            await this.open({
-                platform: this._platform,
-                database,
-                upgrade: this._upgrade,
-                version: this._version,
-            }).then(async () => {
+            const {
+                _platform: platform,
+                _database: database,
+                _upgrade: upgrade,
+                _version: version
+            } = this;
+            await this.open({ platform, database, upgrade, version }).then(async () => {
                 if (this._platform === "web") await sqlite_svc.save_to_store(database);
             });
             return true;
@@ -111,7 +118,7 @@ export class CapacitorClientSQLite {
             return this.append_logs("*-connect", [], "catch", error);
         };
     }
-    
+
     private location_gcs_add_validate(fields: LocationGcsFormFields): LocationGcsFields | string[] {
         const fields_r = Object.entries(fields).filter(([_, v]) => !!v).reduce((acc: Record<string, IModelsQueryValue>, i) => {
             const [key, val] = parse_location_gcs_form_fields(i);
@@ -141,7 +148,7 @@ export class CapacitorClientSQLite {
         const query = `INSERT INTO location_gcs (${bind_values_tup.map(([k]) => k).join(", ")}) VALUES (${bind_values_tup.map((_, index) => `$${1 + index}`).join(", ")});`;
         try {
             const result = await this.execute(query, bind_values);
-            if (typeof result !== "string" && typeof result.changes?.changes === "number" && result.changes.changes > 0) return { id,  };      
+            if (typeof result !== "string" && typeof result.changes?.changes === "number" && result.changes.changes > 0) return { id, };
             else if (typeof result === "string") return result;
             return "*-result";
         } catch (e) {
@@ -157,7 +164,7 @@ export class CapacitorClientSQLite {
     private location_gcs_get_query_list = (opts: ILocationGcsGetList): IModelsQueryParam => {
         const sort = location_gcs_sort[opts.sort || "newest"];
         let query = "";
-        let bind_values = null;
+        const bind_values: IModelsQueryBindValue[] = [];
         if (opts.list[0] === "all") {
             query = `SELECT * FROM location_gcs ORDER BY ${sort};`;
         }
@@ -239,7 +246,7 @@ export class CapacitorClientSQLite {
             return this.append_logs("*", [], query, ["location_gcs_update", e]);
         };
     }
-    
+
     private trade_product_add_validate(fields: TradeProductFormFields): TradeProductFields | string[] {
         const fields_r = Object.entries(fields).filter(([_, v]) => !!v).reduce((acc: Record<string, IModelsQueryValue>, i) => {
             const [key, val] = parse_trade_product_form_fields(i);
@@ -269,7 +276,7 @@ export class CapacitorClientSQLite {
         const query = `INSERT INTO trade_product (${bind_values_tup.map(([k]) => k).join(", ")}) VALUES (${bind_values_tup.map((_, index) => `$${1 + index}`).join(", ")});`;
         try {
             const result = await this.execute(query, bind_values);
-            if (typeof result !== "string" && typeof result.changes?.changes === "number" && result.changes.changes > 0) return { id,  };      
+            if (typeof result !== "string" && typeof result.changes?.changes === "number" && result.changes.changes > 0) return { id, };
             else if (typeof result === "string") return result;
             return "*-result";
         } catch (e) {
@@ -285,7 +292,7 @@ export class CapacitorClientSQLite {
     private trade_product_get_query_list = (opts: ITradeProductGetList): IModelsQueryParam => {
         const sort = trade_product_sort[opts.sort || "newest"];
         let query = "";
-        let bind_values = null;
+        const bind_values: IModelsQueryBindValue[] = [];
         if (opts.list[0] === "all") {
             query = `SELECT * FROM trade_product ORDER BY ${sort};`;
         }
@@ -367,7 +374,7 @@ export class CapacitorClientSQLite {
             return this.append_logs("*", [], query, ["trade_product_update", e]);
         };
     }
-    
+
     private nostr_profile_add_validate(fields: NostrProfileFormFields): NostrProfileFields | string[] {
         const fields_r = Object.entries(fields).filter(([_, v]) => !!v).reduce((acc: Record<string, IModelsQueryValue>, i) => {
             const [key, val] = parse_nostr_profile_form_fields(i);
@@ -397,7 +404,7 @@ export class CapacitorClientSQLite {
         const query = `INSERT INTO nostr_profile (${bind_values_tup.map(([k]) => k).join(", ")}) VALUES (${bind_values_tup.map((_, index) => `$${1 + index}`).join(", ")});`;
         try {
             const result = await this.execute(query, bind_values);
-            if (typeof result !== "string" && typeof result.changes?.changes === "number" && result.changes.changes > 0) return { id,  };      
+            if (typeof result !== "string" && typeof result.changes?.changes === "number" && result.changes.changes > 0) return { id, };
             else if (typeof result === "string") return result;
             return "*-result";
         } catch (e) {
@@ -406,14 +413,14 @@ export class CapacitorClientSQLite {
     }
 
     private nostr_profile_query_bind_values = (opts: INostrProfileQueryBindValues): INostrProfileQueryBindValuesTuple => {
-        if ("public_key" in opts) return ["public_key", opts.public_key];
-        else return ["nip05", opts.nip05];
+        if ("id" in opts) return ["id", opts.id];
+        else return ["public_key", opts.public_key];
     }
 
     private nostr_profile_get_query_list = (opts: INostrProfileGetList): IModelsQueryParam => {
         const sort = nostr_profile_sort[opts.sort || "newest"];
         let query = "";
-        let bind_values = null;
+        const bind_values: IModelsQueryBindValue[] = [];
         if (opts.list[0] === "all") {
             query = `SELECT * FROM nostr_profile ORDER BY ${sort};`;
         }
@@ -495,4 +502,174 @@ export class CapacitorClientSQLite {
             return this.append_logs("*", [], query, ["nostr_profile_update", e]);
         };
     }
+
+    private nostr_relay_add_validate(fields: NostrRelayFormFields): NostrRelayFields | string[] {
+        const fields_r = Object.entries(fields).filter(([_, v]) => !!v).reduce((acc: Record<string, IModelsQueryValue>, i) => {
+            const [key, val] = parse_nostr_relay_form_fields(i);
+            acc[key] = val;
+            return acc;
+        }, {});
+        const schema = NostrRelaySchema;
+        const parsed_schema = schema.safeParse(fields_r);
+        if (!parsed_schema.success) return parsed_schema.error.issues.map(i => i.message);
+        else return {
+            ...parsed_schema.data
+        };
+    }
+
+    public async nostr_relay_add(opts: NostrRelayFormFields): Promise<{ id: string; } | string[] | ICapacitorClientSQLiteMessage> {
+        const opts_v = this.nostr_relay_add_validate(opts);
+        if (Array.isArray(opts_v)) return opts_v;
+        const fields = Object.entries(opts_v);
+        if (!fields.length) return "*-fields";
+        const id = uuidv4();
+        const bind_values_tup: IModelsQueryBindValueTuple[] = [
+            ["id", id],
+            ["created_at", time_created_on()]
+        ];
+        for (const field of this.filter_bind_value_fields(fields)) bind_values_tup.push(field);
+        const bind_values = bind_values_tup.map(([_, v]) => v);
+        const query = `INSERT INTO nostr_relay (${bind_values_tup.map(([k]) => k).join(", ")}) VALUES (${bind_values_tup.map((_, index) => `$${1 + index}`).join(", ")});`;
+        try {
+            const result = await this.execute(query, bind_values);
+            if (typeof result !== "string" && typeof result.changes?.changes === "number" && result.changes.changes > 0) return { id, };
+            else if (typeof result === "string") return result;
+            return "*-result";
+        } catch (e) {
+            return this.append_logs("*", bind_values, query, ["nostr_relay_add", e]);
+        };
+    }
+
+    private nostr_relay_query_bind_values = (opts: INostrRelayQueryBindValues): INostrRelayQueryBindValuesTuple => {
+        if ("id" in opts) return ["id", opts.id];
+        else return ["url", opts.url];
+    }
+
+    private nostr_relay_get_query_list = (opts: INostrRelayGetList): IModelsQueryParam => {
+        const sort = nostr_relay_sort[opts.sort || "newest"];
+        let query = "";
+        const bind_values: IModelsQueryBindValue[] = [];
+        if (opts.list[0] === "all") {
+            query = `SELECT * FROM nostr_relay ORDER BY ${sort};`;
+        } else if (opts.list[0] === "on_key") {
+            query = `SELECT rl.* FROM nostr_relay rl JOIN nostr_profile_relay pr_rl ON rl.id = pr_rl.tb_pr_rl_1 JOIN nostr_profile pr ON pr.id = pr_rl.tb_pr_rl_0 WHERE pr.public_key = $1 ORDER BY ${sort};`;
+            bind_values.push(opts.list[1].public_key);
+        } else if (opts.list[0] === "off_key") {
+            query = `SELECT rl.* FROM nostr_relay rl LEFT JOIN nostr_profile_relay pr_rl ON rl.id = pr_rl.tb_pr_rl_1 LEFT JOIN nostr_profile pr ON pr.id = pr_rl.tb_pr_rl_0 WHERE pr.public_key <> $1 ORDER BY ${sort};`;
+            bind_values.push(opts.list[1].public_key);
+        }
+        if (!query) throw new Error("Error: Missing query (nostr_relay_get_query_list)")
+        return {
+            query,
+            bind_values
+        };
+    }
+
+    private nostr_relay_get_parse_opts = (opts: INostrRelayGet): IModelsQueryParam => {
+        if ("list" in opts) return this.nostr_relay_get_query_list(opts);
+        else {
+            const [bv_k, bv_v] = this.nostr_relay_query_bind_values(opts);
+            return {
+                query: `SELECT * FROM nostr_relay WHERE ${bv_k} = $1;`,
+                bind_values: [bv_v]
+            };
+        };
+    }
+
+    public async nostr_relay_get(opts: INostrRelayGet): Promise<NostrRelay[] | ICapacitorClientSQLiteMessage> {
+        const { query, bind_values } = this.nostr_relay_get_parse_opts(opts);
+        try {
+            const response = await this.select(query, bind_values);
+            if (typeof response === "string") return response;
+            else {
+                const result = parse_nostr_relay_list(response);
+                if (result) return result;
+            }
+            return "*-result";
+        } catch (e) {
+            return this.append_logs("*", opts, query, ["nostr_relay_get", e]);
+        };
+    }
+
+    public async nostr_relay_delete(opts: INostrRelayQueryBindValues): Promise<true | ICapacitorClientSQLiteMessage> {
+        const [bv_k, bv_v] = this.nostr_relay_query_bind_values(opts);
+        const bind_values = [bv_v];
+        const query = `DELETE FROM nostr_relay WHERE ${bv_k} = $1;`;
+        try {
+            const response = await this.execute(query, bind_values);
+            if (typeof response === "string") return response;
+            else if (typeof response.changes?.changes === "number" && response.changes.changes > 0) return true;
+            return "*-result";
+        } catch (e) {
+            return this.append_logs("*", [], query, ["nostr_relay_delete", e]);
+        };
+    }
+
+    private nostr_relay_update_validate(fields: Partial<NostrRelayFormFields>): Partial<NostrRelayFields> | string[] {
+        const fields_r = Object.entries(fields).filter(([_, v]) => !!v).reduce((acc: Record<string, IModelsQueryValue>, i) => {
+            const [key, val] = parse_nostr_relay_form_fields(i);
+            acc[key] = val;
+            return acc;
+        }, {});
+        const schema = NostrRelayUpdateSchema;
+        const parsed_schema = schema.safeParse(fields_r);
+        if (!parsed_schema.success) return parsed_schema.error.issues.map(i => i.message);
+        else return {
+            ...parsed_schema.data
+        };
+    }
+
+    public async nostr_relay_update(opts: INostrRelayUpdate): Promise<true | string[] | ICapacitorClientSQLiteMessage> {
+        const opts_v = this.nostr_relay_update_validate(opts.fields);
+        if (Array.isArray(opts_v)) return opts_v;
+        const fields = this.filter_bind_value_fields(Object.entries(opts_v));
+        if (!fields.length) return "*-fields";
+        const [bv_k, bv_v] = this.nostr_relay_query_bind_values(opts.on);
+        const bind_values = [...fields.map(([_, v]) => v), bv_v];
+        const query = `UPDATE nostr_relay SET ${fields.map(([k], index) => `${k} = $${1 + index}`).join(", ")} WHERE ${bv_k} = $${bind_values.length};`;
+        try {
+            const response = await this.execute(query, bind_values);
+            if (typeof response === "string") return response;
+            else if (typeof response.changes?.changes === "number" && response.changes.changes > 0) return true;
+            return "*-result";
+        } catch (e) {
+            return this.append_logs("*", [], query, ["nostr_relay_update", e]);
+        };
+    }
+
+    public async set_nostr_profile_relay(opts: { nostr_profile: INostrProfileQueryBindValues; nostr_relay: INostrRelayQueryBindValues; }): Promise<true | ICapacitorClientSQLiteMessage> {
+        const bv_np = this.nostr_profile_query_bind_values(opts.nostr_profile)
+        const bv_nr = this.nostr_relay_query_bind_values(opts.nostr_relay)
+        const bind_values = [bv_np[1], bv_nr[1]];
+        const query = `INSERT INTO nostr_profile_relay (tb_pr_rl_0, tb_pr_rl_1) VALUES ((SELECT id FROM nostr_profile WHERE ${bv_np[0]} = $1), (SELECT id FROM nostr_relay WHERE ${bv_nr[0]} = $2));`;
+        try {
+            const response = await this.execute(query, bind_values);
+            if (typeof response === "string") {
+                return response;
+            } else if (typeof response.changes?.changes === "number" && response.changes.changes > 0) {
+                return true;
+            }
+            return "*-result";
+        } catch (e) {
+            return this.append_logs("*", bind_values, query, ["set_nostr_profile_relay", e]);
+        };
+    };
+
+    public async unset_nostr_profile_relay(opts: { nostr_profile: INostrProfileQueryBindValues; nostr_relay: INostrRelayQueryBindValues; }): Promise<true | ICapacitorClientSQLiteMessage> {
+        const bv_np = this.nostr_profile_query_bind_values(opts.nostr_profile)
+        const bv_nr = this.nostr_relay_query_bind_values(opts.nostr_relay)
+        const bind_values = [bv_np[1], bv_nr[1]];
+        const query = `DELETE FROM nostr_profile_relay WHERE tb_pr_rl_0 = (SELECT id FROM nostr_profile WHERE ${bv_np[0]} = $1) AND tb_pr_rl_1 = (SELECT id FROM nostr_relay WHERE ${bv_nr[0]} = $2);`;
+        try {
+            const response = await this.execute(query, bind_values);
+            if (typeof response === "string") {
+                return response;
+            } else if (typeof response.changes?.changes === "number" && response.changes.changes > 0) {
+                return true;
+            }
+            return "*-result";
+        } catch (e) {
+            return this.append_logs("*", bind_values, query, ["unset_nostr_profile_relay", e]);
+        };
+    };
 };
