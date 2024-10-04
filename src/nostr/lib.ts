@@ -56,7 +56,7 @@ export class ClientNostrLib implements IClientNostrLib {
      * @returns nostr public key npub
      */
     public npub(public_key_hex: string | undefined, fallback_to_hex?: boolean): string {
-        if (!public_key_hex) return fallback_to_hex ? public_key_hex : ``;
+        if (!public_key_hex) return ``;
         const npub = nip19.npubEncode(public_key_hex);
         return npub ? npub : fallback_to_hex ? public_key_hex : ``;
     }
