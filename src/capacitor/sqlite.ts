@@ -423,6 +423,12 @@ export class CapacitorClientSQLite {
         const bind_values: IModelsQueryBindValue[] = [];
         if (opts.list[0] === "all") {
             query = `SELECT * FROM nostr_profile ORDER BY ${sort};`;
+        } else if (opts.list[0] === "on_relay") {
+            query = `SELECT pr.* FROM nostr_profile pr JOIN nostr_profile_relay np_rl ON pr.id = np_rl.tb_pr_rl_0 WHERE np_rl.tb_pr_rl_1 = $1;`;
+            bind_values.push(opts.list[1].id);
+        } else if (opts.list[0] === "off_relay") {
+            query = `SELECT pr.* FROM nostr_profile pr WHERE NOT EXISTS (SELECT 1 FROM nostr_profile_relay pr_rl WHERE pr_rl.tb_pr_rl_0 = pr.id AND pr_rl.tb_pr_rl_1 = $1);`;
+            bind_values.push(opts.list[1].id);
         }
         if (!query) throw new Error("Error: Missing query (nostr_profile_get_query_list)")
         return {
@@ -551,10 +557,10 @@ export class CapacitorClientSQLite {
         const bind_values: IModelsQueryBindValue[] = [];
         if (opts.list[0] === "all") {
             query = `SELECT * FROM nostr_relay ORDER BY ${sort};`;
-        } else if (opts.list[0] === "on_key") {
+        } else if (opts.list[0] === "on_profile") {
             query = `SELECT rl.* FROM nostr_relay rl JOIN nostr_profile_relay pr_rl ON rl.id = pr_rl.tb_pr_rl_1 JOIN nostr_profile pr ON pr.id = pr_rl.tb_pr_rl_0 WHERE pr.public_key = $1 ORDER BY ${sort};`;
             bind_values.push(opts.list[1].public_key);
-        } else if (opts.list[0] === "off_key") {
+        } else if (opts.list[0] === "off_profile") {
             query = `SELECT rl.* FROM nostr_relay rl LEFT JOIN nostr_profile_relay pr_rl ON rl.id = pr_rl.tb_pr_rl_1 LEFT JOIN nostr_profile pr ON pr.id = pr_rl.tb_pr_rl_0 WHERE pr.public_key <> $1 ORDER BY ${sort};`;
             bind_values.push(opts.list[1].public_key);
         }
