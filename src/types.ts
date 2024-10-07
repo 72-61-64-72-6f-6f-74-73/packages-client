@@ -3,7 +3,7 @@ import { type NDKEvent } from "@nostr-dev-kit/ndk";
 import { type ScanResult } from '@radroots/capacitor-bluetooth-le';
 import { IOSSettings, type AndroidSettings } from '@radroots/capacitor-native-settings';
 import { type ConnectToWifiResult, type GetCurrentWifiResult, type PermissionStatus, type ScanWifiResult } from '@radroots/capacitor-wifi';
-import { type ErrorResponse } from '@radroots/utils';
+import type { ErrorMessage, ErrorResponse } from '@radroots/utils';
 import { CapacitorClientSQLite } from './capacitor/sqlite';
 
 export type IClient = {
@@ -145,10 +145,10 @@ export type IClientGeolocationPosition = {
     altitude_accuracy: number | undefined;
 };
 
-export type IGeolocationErrorMessage = `permissions-required`;
+export type IGeolocationErrorMessage = `permissions-required` | `*`;
 
 export type IClientGeolocation = {
-    current(): Promise<IClientGeolocationPosition | undefined | IGeolocationErrorMessage>;
+    current(): Promise<IClientGeolocationPosition | ErrorMessage<IGeolocationErrorMessage>>
 };
 
 export type IClientHttpOpts = {
@@ -175,7 +175,7 @@ export type IClientHttpResponse = {
 };
 
 export type IClientHttp = {
-    fetch(opts: IClientHttpOpts): Promise<IClientHttpResponse | string>;
+    fetch(opts: IClientHttpOpts): Promise<IClientHttpResponse | ErrorMessage<string>>;
 };
 
 export type IClientWindow = {

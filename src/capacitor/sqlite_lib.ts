@@ -1,7 +1,7 @@
 import { Capacitor } from "@capacitor/core";
 import { CapacitorSQLite, type capSQLiteUpgradeOptions, type capSQLiteVersionUpgrade, SQLiteConnection, SQLiteDBConnection } from "@radroots/capacitor-sqlite";
 import type { IModelsQueryBindValue } from "@radroots/models";
-import { err_msg } from "@radroots/utils";
+import { handle_error } from "@radroots/utils";
 
 export type ISQLiteServiceDatabaseLog = { key: string, bind_values: IModelsQueryBindValue[], query: string, e: any };
 export type IISQLiteServiceOpenDatabase = {
@@ -43,7 +43,7 @@ export class CapacitorClientSQLiteService {
         try {
             await this._conn.initWebStore();
         } catch (e) {
-            const { error } = err_msg(e);
+            const { error } = handle_error(e);
             throw new Error(`Error: CapacitorClientSQLiteService init_web_store: ${error}`);
         }
     }
@@ -52,7 +52,7 @@ export class CapacitorClientSQLiteService {
         try {
             await this._plugin.addUpgradeStatement(options);
         } catch (e) {
-            const { error } = err_msg(e);
+            const { error } = handle_error(e);
             throw new Error(`Error: CapacitorClientSQLiteService add_upgrade: ${error}`);
         }
     }
@@ -72,7 +72,7 @@ export class CapacitorClientSQLiteService {
             if (!res) throw new Error('Error: CapacitorClientSQLiteService open_db: database not opened')
             return db;
         } catch (e) {
-            const { error } = err_msg(e);
+            const { error } = handle_error(e);
             throw new Error(`Error: CapacitorClientSQLiteService open_db: ${error}`);
         }
     }
@@ -82,7 +82,7 @@ export class CapacitorClientSQLiteService {
             const is_conn = (await this._conn.isConnection(db_name, read_only)).result;
             if (is_conn) await this._conn.closeConnection(db_name, read_only);
         } catch (e) {
-            const { error } = err_msg(e);
+            const { error } = handle_error(e);
             throw new Error(`Error: CapacitorClientSQLiteService close_db: ${error}`);
         }
     }
@@ -91,7 +91,7 @@ export class CapacitorClientSQLiteService {
         try {
             await this._conn.saveToStore(db_name);
         } catch (e) {
-            const { error } = err_msg(e);
+            const { error } = handle_error(e);
             throw new Error(`Error: CapacitorClientSQLiteService save_to_store: ${error}`);
         }
     }
@@ -100,7 +100,7 @@ export class CapacitorClientSQLiteService {
         try {
             await this._conn.saveToLocalDisk(db_name);
         } catch (e) {
-            const { error } = err_msg(e);
+            const { error } = handle_error(e);
             throw new Error(`Error: CapacitorClientSQLiteService save_to_disk: ${error}`);
         }
     }
@@ -111,7 +111,7 @@ export class CapacitorClientSQLiteService {
             if (is_conn !== undefined) return is_conn;
             throw new Error(`Error: CapacitorClientSQLiteService is_conn undefined`);
         } catch (e) {
-            const { error } = err_msg(e);
+            const { error } = handle_error(e);
             throw new Error(`Error: CapacitorClientSQLiteService is_conn: ${error}`);
         }
     }

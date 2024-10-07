@@ -1,8 +1,9 @@
 import { CapacitorHttp, type HttpOptions } from '@capacitor/core';
+import { err_msg, type ErrorMessage } from '@radroots/utils';
 import type { IClientHttp, IClientHttpOpts, IClientHttpResponse } from '../types';
 
 export class CapacitorClientHttp implements IClientHttp {
-    public async fetch(opts: IClientHttpOpts): Promise<IClientHttpResponse | string> {
+    public async fetch(opts: IClientHttpOpts): Promise<IClientHttpResponse | ErrorMessage<string>> {
         try {
             const { url, params, data, headers, read_timeout: readTimeout, connect_timeout: connectTimeout } = opts;
             const options: HttpOptions = {
@@ -21,7 +22,7 @@ export class CapacitorClientHttp implements IClientHttp {
                 return res;
             }
         } catch (e) {
-            return String(e);
+            return err_msg(String(e));
         };
     }
 }

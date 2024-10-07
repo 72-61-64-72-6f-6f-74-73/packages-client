@@ -1,6 +1,6 @@
 
 import { Camera, CameraResultType } from '@capacitor/camera';
-import { err_msg, type ErrorResponse } from '@radroots/utils';
+import { handle_error, type ErrorResponse } from '@radroots/utils';
 import type { IClientCamera, OsPhoto, OsPhotoGallery, OsPhotoGallerySelectOptions, OsPhotoSelectOptions, OsPhotosPermissions } from '../types';
 
 export class CapacitorClientCamera implements IClientCamera {
@@ -26,7 +26,7 @@ export class CapacitorClientCamera implements IClientCamera {
                 photos
             };
         } catch (e) {
-            return err_msg(e);
+            return handle_error(e);
         };
     }
 
@@ -40,7 +40,7 @@ export class CapacitorClientCamera implements IClientCamera {
                 photos
             };
         } catch (e) {
-            return err_msg(e);
+            return handle_error(e);
         };
     }
 
@@ -95,7 +95,7 @@ export class CapacitorClientCamera implements IClientCamera {
                 saved
             };
         } catch (e) {
-            return err_msg(e);
+            return handle_error(e);
         };
     }
 
@@ -124,7 +124,7 @@ export class CapacitorClientCamera implements IClientCamera {
                 format: i.format
             }));
         } catch (e) {
-            return err_msg(e);
+            return handle_error(e);
         };
     }
 }
