@@ -1,6 +1,6 @@
 import { SQLiteDBConnection, type capSQLiteChanges, type DBSQLiteValues } from "@radroots/capacitor-sqlite";
 import { type IModelsQueryBindValue, type IModelsQueryBindValueTuple, type IModelsQueryParam, type IModelsQueryValue, type ModelsUniqueConstraintMessages, type ILocationGcsAddResolve,type ILocationGcsDeleteResolve,type ILocationGcsGetResolve,type ILocationGcsUpdateResolve, parse_location_gcs_form_fields, location_gcs_sort, type ILocationGcsGetList, type ILocationGcsGet, type ILocationGcsUpdate, type ILocationGcsQueryBindValues, type ILocationGcsQueryBindValuesKey, type ILocationGcsQueryBindValuesTuple, parse_location_gcs, parse_location_gcs_list, type LocationGcs, type LocationGcsFields, type LocationGcsFormFields, LocationGcsSchema, LocationGcsUpdateSchema, type ITradeProductAddResolve,type ITradeProductDeleteResolve,type ITradeProductGetResolve,type ITradeProductUpdateResolve, parse_trade_product_form_fields, trade_product_sort, type ITradeProductGetList, type ITradeProductGet, type ITradeProductUpdate, type ITradeProductQueryBindValues, type ITradeProductQueryBindValuesKey, type ITradeProductQueryBindValuesTuple, parse_trade_product, parse_trade_product_list, type TradeProduct, type TradeProductFields, type TradeProductFormFields, TradeProductSchema, TradeProductUpdateSchema, type INostrProfileAddResolve,type INostrProfileDeleteResolve,type INostrProfileGetResolve,type INostrProfileUpdateResolve, parse_nostr_profile_form_fields, nostr_profile_sort, type INostrProfileGetList, type INostrProfileGet, type INostrProfileUpdate, type INostrProfileQueryBindValues, type INostrProfileQueryBindValuesKey, type INostrProfileQueryBindValuesTuple, parse_nostr_profile, parse_nostr_profile_list, type NostrProfile, type NostrProfileFields, type NostrProfileFormFields, NostrProfileSchema, NostrProfileUpdateSchema, NostrProfileMetadataSchema, type INostrRelayAddResolve,type INostrRelayDeleteResolve,type INostrRelayGetResolve,type INostrRelayUpdateResolve, parse_nostr_relay_form_fields, nostr_relay_sort, type INostrRelayGetList, type INostrRelayGet, type INostrRelayUpdate, type INostrRelayQueryBindValues, type INostrRelayQueryBindValuesKey, type INostrRelayQueryBindValuesTuple, parse_nostr_relay, parse_nostr_relay_list, type NostrRelay, type NostrRelayFields, type NostrRelayFormFields, NostrRelaySchema, NostrRelayUpdateSchema } from "@radroots/models";
-import { err_msg, handle_error, time_created_on, uuidv4, type ErrorMessage } from "@radroots/utils";
+import { err_msg, time_created_on, uuidv4, type ErrorMessage } from "@radroots/utils";
 import { sqlite_svc, sqlite_version_svc, type IISQLiteServiceOpenDatabase } from "./sqlite_lib";
 
 export type ICapacitorClientSQLiteMessage = 
@@ -26,7 +26,7 @@ export type ICapacitorClientSQLite = {
 export class CapacitorClientSQLite {
     private _platform = sqlite_svc.platform;
     private _conn: SQLiteDBConnection | null = null;
-	private _database: string;
+    private _database: string;
     private _upgrade: ICapacitorClientSQLiteUpgrade[];
     private _version: number;
 
@@ -49,8 +49,8 @@ export class CapacitorClientSQLite {
 
     private handle_errors(error_msg: ICapacitorClientSQLiteMessage, bind_values: IModelsQueryBindValue[], query: string, e: any): ErrorMessage<ICapacitorClientSQLiteMessage> {
         const err = this.append_logs(error_msg, bind_values, query, e);
-       	if (String(e).includes("UNIQUE constraint failed: location_gcs.geohash")) return err_msg("*-location-gcs-geohash-unique");
-		else if (String(e).includes("UNIQUE constraint failed: nostr_relay.url")) return err_msg("*-nostr-relay-url-unique");
+        if (String(e).includes("UNIQUE constraint failed: location_gcs.geohash")) return err_msg("*-location-gcs-geohash-unique");
+        else if (String(e).includes("UNIQUE constraint failed: nostr_relay.url")) return err_msg("*-nostr-relay-url-unique");
         return err_msg(err);
     }
 
@@ -111,7 +111,7 @@ export class CapacitorClientSQLite {
             });
             return true;
         } catch (e) {
-			return this.handle_errors("*-connect", [], "connect()", e);
+            return this.handle_errors("*-connect", [], "connect()", e);
         };
     }
     
@@ -634,33 +634,33 @@ export class CapacitorClientSQLite {
         };
     }
 
-	public async set_nostr_profile_relay(opts: { nostr_profile: INostrProfileQueryBindValues; nostr_relay: INostrRelayQueryBindValues; }): Promise<true | ErrorMessage<ICapacitorClientSQLiteMessage>> {
+    public async set_nostr_profile_relay(opts: { nostr_profile: INostrProfileQueryBindValues; nostr_relay: INostrRelayQueryBindValues; }): Promise<true | ErrorMessage<ICapacitorClientSQLiteMessage>> {
         const bv_np = this.nostr_profile_query_bind_values(opts.nostr_profile)
-		const bv_nr = this.nostr_relay_query_bind_values(opts.nostr_relay)
-		const bind_values = [bv_np[1], bv_nr[1]];
+        const bv_nr = this.nostr_relay_query_bind_values(opts.nostr_relay)
+        const bind_values = [bv_np[1], bv_nr[1]];
         const query = `INSERT INTO nostr_profile_relay (tb_pr_rl_0, tb_pr_rl_1) VALUES ((SELECT id FROM nostr_profile WHERE ${bv_np[0]} = $1), (SELECT id FROM nostr_relay WHERE ${bv_nr[0]} = $2));`;
-		try {
-			const response = await this.execute(query, bind_values);
-			if (typeof response === "string") return err_msg(response);
-			else if (typeof response.changes?.changes === "number" && response.changes.changes > 0) return true;
-			return err_msg("*-result");
-		} catch (e) {
-			return this.handle_errors("*", bind_values, query, ["set_nostr_profile_relay", opts, e]);
-		};
-	};    
+        try {
+            const response = await this.execute(query, bind_values);
+            if (typeof response === "string") return err_msg(response);
+            else if (typeof response.changes?.changes === "number" && response.changes.changes > 0) return true;
+            return err_msg("*-result");
+        } catch (e) {
+            return this.handle_errors("*", bind_values, query, ["set_nostr_profile_relay", opts, e]);
+        };
+    };    
 
-	public async unset_nostr_profile_relay(opts: { nostr_profile: INostrProfileQueryBindValues; nostr_relay: INostrRelayQueryBindValues; }): Promise<true | ErrorMessage<ICapacitorClientSQLiteMessage>> {
+    public async unset_nostr_profile_relay(opts: { nostr_profile: INostrProfileQueryBindValues; nostr_relay: INostrRelayQueryBindValues; }): Promise<true | ErrorMessage<ICapacitorClientSQLiteMessage>> {
         const bv_np = this.nostr_profile_query_bind_values(opts.nostr_profile)
-		const bv_nr = this.nostr_relay_query_bind_values(opts.nostr_relay)
+        const bv_nr = this.nostr_relay_query_bind_values(opts.nostr_relay)
         const bind_values = [bv_np[1], bv_nr[1]];
         const query = `DELETE FROM nostr_profile_relay WHERE tb_pr_rl_0 = (SELECT id FROM nostr_profile WHERE ${bv_np[0]} = $1) AND tb_pr_rl_1 = (SELECT id FROM nostr_relay WHERE ${bv_nr[0]} = $2);`;
         try {
-			const response = await this.execute(query, bind_values);
-			if (typeof response === "string") return err_msg(response);
-			else if (typeof response.changes?.changes === "number" && response.changes.changes > 0) return true;
-			return err_msg("*-result");
-		} catch (e) {
-			return this.handle_errors("*", bind_values, query, ["unset_nostr_profile_relay", opts, e]);
-		};
-	};
+            const response = await this.execute(query, bind_values);
+            if (typeof response === "string") return err_msg(response);
+            else if (typeof response.changes?.changes === "number" && response.changes.changes > 0) return true;
+            return err_msg("*-result");
+        } catch (e) {
+            return this.handle_errors("*", bind_values, query, ["unset_nostr_profile_relay", opts, e]);
+        };
+    };
 };
